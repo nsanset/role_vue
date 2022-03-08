@@ -3,14 +3,11 @@
     <div class="row">
       <div class="col-md-12 row">
         <div class="col-md-12">
-          <h1 class="titleUser text-center">Drivers HR Department of Fleet Adventure Group</h1>
+          <h1 class="titleUser text-center">DRIVERS HR DEPARTMENT OF FLEET ADVANTAGE GROUP</h1>
         </div>
-        <div class="col-md-6">
-           <div class="col-md-12 warning">
-              <div> 
-<!--               <div v-if="endDriverLicence.length || endMedicalCard.length">  -->
+
                 <div class="modal-vue">
-                  <div class="btnWarning" @click="showModal = true"><h4>Expired documents</h4></div>
+                  <!-- <div class="btnWarning" @click="showModal = true"><h4>Expired documents</h4></div> -->
                   <div class="overlays" v-if="showModal" @click="showModal = false"></div>
                   <div class="modals animate__animated animate__fadeIn" v-if="showModal">
                     <div class="closes" @click="showModal = false">x</div>
@@ -23,8 +20,8 @@
                               <router-link v-if="endDriverLicence.length" style="text-decoration: none; color: inherit;" :to="'admin/user/' + item.id">
                                 <div class="userCardModal row">
                                   <img class="col-md-2" alt="logo profile" src="../assets/profile.png">
-                                  <span class="col-md-5" >Driver: {{ item.firstName }} {{ item.lastName }} </span>
-                                  <span class="col-md-5">End date: {{ item.date | moment("MM/DD/YYYY") }}</span>
+                                  <span class="col-md-6" >Driver: {{ item.firstName }} {{ item.lastName }} </span>
+                                  <span class="col-md-4">End date: {{ item.date | moment("MM/DD/YYYY") }}</span>
                                 </div> 
                               </router-link>
                             </div>    
@@ -39,8 +36,8 @@
                               <router-link v-if="endMedicalCard.length" style="text-decoration: none; color: inherit;" :to="'admin/user/' + item.id">
                                 <div class="userCardModal row">
                                   <img class="col-md-2" alt="logo profile" src="../assets/profile.png">
-                                  <span class="col-md-5" >Driver: {{ item.firstName }} {{ item.lastName }} </span>
-                                  <span class="col-md-5">End date: {{ item.date | moment("MM/DD/YYYY") }}</span>
+                                  <span class="col-md-6" >Driver: {{ item.firstName }} {{ item.lastName }} </span>
+                                  <span class="col-md-4">End date: {{ item.date | moment("MM/DD/YYYY") }}</span>
                                 </div> 
                               </router-link>
                             </div>
@@ -50,14 +47,9 @@
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-        </div>
+      
 
-        <div class="col-md-6">
-          <div class="col-md-12 warning">
             <div class="modal-vue">
-              <div class="btnWarning" @click="showModalMissing = true"><h4>Missing documents</h4></div>
               <div class="overlays" v-if="showModalMissing" @click="showModalMissing = false"></div>
               <div class="modals animate__animated animate__fadeIn" v-if="showModalMissing">
                 <div class="closes" @click="showModalMissing = false">x</div>
@@ -95,13 +87,8 @@
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
-
-
-
-        <div class="col-xl-12 wrapperFilter animate__animated animate__fadeInDown" style="position: absolute; top: 175px; z-index: 20;">
+        <div class="col-xl-12 wrapperFilter animate__animated animate__fadeInDown" style="position: absolute; top: 110px; z-index: 20;">
           <div class="row">
             <div class="col-lg-6">
               <label class="filterUser">
@@ -132,32 +119,64 @@
 
           </div>
         </div>
-        <div class="col-md-12 row users">
-              <div class="col-md-4 animate__animated animate__headShake" v-for="item in pageOfItems" :key="item._id">
-                  <router-link  style="text-decoration: none; color: inherit;" :to="'admin/user/' + item._id">
-                    <div class="cardUser">
-                      <div class="row">
-                        <img class="iconProfile col-sm-2" alt="logo profile" src="../assets/profile.png">
-                        <div class="col-sm-7">                          
-                          <ul>
-                            <li v-if="!item.firstName || !item.lastName">{{item.username}}</li>
-                            <li v-if="item.firstName || item.lastName" class="cardUserName">{{item.firstName}} {{item.lastName}}</li>
-                            <li v-if="item.employingCompany">{{item.employingCompany}}</li>
-                            <li v-if="item.dateOfEmplouyment">Employment: <span>{{ item.dateOfEmplouyment | moment("MM/DD/YYYY") }}</span></li>
-                          </ul>
+        <div class="col-md-12 row">
+          <div class="col-md-2 boardMenu">
+            <div class="btnWarning animate__animated animate__fadeInDown" @click="showModal = true">Expired documents</div>
+            <div class="btnWarning animate__animated animate__fadeInDown" @click="showModalMissing = true">Missing documents</div>
+            <div class="dampFile animate__animated animate__fadeInDown">
+              <json-excel
+                :data = "filteredPeople"
+                :exportFields = "json_fields"
+                worksheet = "Drivers"
+                :name = "fileName">
+                <font-awesome-icon icon="download" /> Download Excel
+              </json-excel>
+            </div>
+          </div>
+          <div class="col-md-10 row users">
+                <div class="col-md-4 animate__animated animate__headShake" v-for="item in pageOfItems" :key="item._id">
+                    <router-link  style="text-decoration: none; color: inherit;" :to="'admin/user/' + item._id">
+                      <div class="cardUser">
+                        <div class="row">
+                          <!-- <img class="iconProfile col-sm-2" alt="logo profile" src="../assets/profile.png"> -->
+                          <div class="col-sm-10">                     
+                            <ul>
+                              <li v-if="!item.firstName || !item.lastName">
+                                {{item.username}}
+                              </li>
+                              <li v-if="item.firstName || item.lastName" class="cardUserName">
+                                <img class="cardUserIco" src="../assets/driver.jpg">
+                                {{item.firstName}} {{item.lastName}}
+                              </li>
+                              <li v-if="item.employingCompany">
+                                <img class="cardUserIco" src="../assets/trucks.jpg">
+                                {{ item.employingCompany}}
+                              </li>
+                              <li v-if="item.dateOfEmplouyment">
+                                <img class="cardUserIco" src="../assets/empl.jpg">
+                                {{ item.dateOfEmplouyment | moment("MM/DD/YYYY") }}
+                              </li>
+                            </ul>
+                          </div>
+                          <div class="col-sm-2 cardUserNumber">{{item.number}}</div>
                         </div>
-                        <div class="col-sm-2 cardUserNumber">{{item.number}}</div>
                       </div>
-                    </div>
-                  </router-link>
-              </div>
+                    </router-link>
+                </div>
+                <div class="col-md-12 paginationUser">
+                  <span class="totalUsers">Total: {{all.length}}</span>
+                  <div>
+                    <jw-pagination :items="all" :pageSize="12" @changePage="onChangePage"></jw-pagination>
+                  </div>
+                </div>
+          </div>
         </div>
-        <div class="col-md-12 paginationUser">
+<!--         <div class="col-md-12 paginationUser">
           <span class="totalUsers">Total: {{all.length}}</span>
           <div>
             <jw-pagination :items="all" :pageSize="12" @changePage="onChangePage"></jw-pagination>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
     <div v-for="item in content" :key="item._id">
@@ -177,13 +196,43 @@ Vue.use(Toasted);
 // import authHeader from '../services/auth-header';
 import UserService from '../services/user.service';
 import Countdown from '../components/Countdown';
+
+import JsonExcel from 'vue-json-excel'
+
+
 export default {
   name: 'Admin',
   components:{
-    Countdown
+    Countdown, JsonExcel
   },
   data() {
     return {
+      fileName:"Drivers.xls",
+      json_fields: {
+        "First name": 'firstName',
+        "Last name": 'lastName',
+        "Date of birth": 'dateOfBirth',
+        "Social security number": 'socialSecurityNumber',
+        "Driver license number": 'driverLicenseNumber',
+        "Driver license state": 'driverLicenseState',
+        "Driver license issue date": 'driverLicenseIssueDate',
+        "Driver Licence expired date": 'endOfDateDriverLicense',
+        "Home adress": 'homeAdress',
+        "Phone number": 'phoneNumber',
+        "Email": 'email',
+        "Employing company": 'employingCompany',
+        "Date of employment": 'dateOfEmplouyment',
+        "Date of dismissal": 'dateOfDismissal',
+        "Comment": 'comment'
+      },
+      json_meta: [
+        [
+          {
+            'key': 'charset',
+            'value': 'utf-8'
+          }
+        ]
+      ],
       content: [],
       endDriverLicence: [],
       endMedicalCard: [],
@@ -254,6 +303,10 @@ export default {
 .cardUser ul {
   list-style-type: none;
 }
+.cardUserIco {
+  width: 20px;
+  height: 20px;
+}
 .pp{
   border: 1px solid red;
   height: 100px;
@@ -319,18 +372,18 @@ export default {
 .btnWarning {
   background: #ED6868;;
   border: 1px solid #FF4742;
-  border-radius: 6px;
+  border-radius: 5px;
   box-shadow: rgba(0, 0, 0, 0.1) 1px 2px 4px;
   box-sizing: border-box;
   color: #FFFFFF;
   cursor: pointer;
   display: inline-block;
-  font-size: 16px;
-  font-weight: 800;
-  line-height: 16px;
-  min-height: 40px;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 15px;
+  min-height: 30px;
   outline: 0;
-  padding: 12px 14px;
+  padding: 10px 10px;
   text-align: center;
   text-rendering: geometricprecision;
   text-transform: none;
@@ -338,7 +391,8 @@ export default {
   -webkit-user-select: none;
   touch-action: manipulation;
   vertical-align: middle;
-  width: 100%;
+  width: 95%;
+  margin-bottom: 10px;
 }
 
 .btnWarning:hover,
@@ -355,12 +409,32 @@ export default {
   padding-top: 15px;
   padding-bottom: 15px;
   color: rgba(56, 60, 87, 0.7);
+  border: 3px solid rgb(226, 228, 228);
+  border-radius: 5px;
+  margin-top: 10px;
 }
 .filterUser {
   padding-bottom: 20px;
   padding-right: 20px;
   font-weight: 700;
   color: rgba(56, 60, 87, 0.7);
+}
+.dampFile {
+  position: absolute;
+  top: 95px;
+  width: 95%;
+  margin-left: 0px;
+  padding: 5px 5px;
+  text-align: center;
+  font-weight: 700;
+  color: rgba(56, 60, 87, 0.7);
+  border: 2px solid rgb(113 171 127 / 100%);
+  border-radius: 5px;
+  cursor: pointer;
+}
+.dampFile:hover {
+  color: #fff;
+  background-color: #48BF91;
 }
 .cardUser {
   border: 1px solid rgb(179 179 179 / 50%);
@@ -381,6 +455,7 @@ export default {
   transition-property: transform;
   -webkit-transition-timing-function: ease-out;
   transition-timing-function: ease-out;
+
 }
 .cardUser:hover {
   border-left: 4px solid rgb(113 171 127 / 100%);
@@ -390,15 +465,26 @@ export default {
 }
 .paginationUser {
   position: absolute;
-  top: 760px;
+  top: 530px;
 }
 .users {
   position: absolute; 
   z-index: 1;
-  top: 230px;
+  top: 180px;
+  right: 22px;
   min-height: 55vh;
   margin-bottom: 20px;
   padding-left: 10px;
+  padding-right: 0px;
+}
+.boardMenu {
+  position: absolute; 
+  z-index: 1;
+  top: 180px;
+  left: 0px;
+  min-height: 55vh;
+  margin-bottom: 20px;
+  padding-left: 0px;
   padding-right: 0px;
 }
 .overlays {
@@ -440,13 +526,14 @@ export default {
   background-color: #ED6868;
 }
 .userCardModal {
-  padding-top: 10px;
-  height: 50px;
+  padding-top: 5px;
+  height: 55px;
   border: 1px solid rgb(179 179 179 / 80%);
   margin-bottom: 20px;
   margin-right: 20px;
   margin-left: 3px;
   padding-left: 12px;
+  border-radius: 5px;
 }
 .userCardModal:hover {
   padding-left: 5px;
@@ -465,6 +552,7 @@ export default {
   padding-left: 5px;
 }
 
+
 @media screen and (max-width: 1399px) {
   .modals h2 {
     height: 80px;
@@ -473,18 +561,14 @@ export default {
     padding: 8px 0px;
   }
   .cardUser {    
-    height: 130px;
-    padding: 7px;
+    height: 110px;
+    padding: 10px;
     margin-bottom: 5px;
   }
   .titleUser {
   padding-top: 15px;
   padding-bottom: 15px;
-  font-size: 30px;
-  }
-  .paginationUser {
-    position: absolute;
-    top: 775px;
+  font-size: 29px;
   }
 }
 @media screen and (max-width: 1199px) {
@@ -498,12 +582,13 @@ export default {
   .inputSearch {
     width: 97%;
   }
-  .cardUser {
-    padding: 3px;
-    margin-bottom: 5px;
-  }
   .cardUser ul {
     padding-left: 0px;
+  }
+  .cardUser {
+    height: 125px;
+    padding: 3px;
+    margin-bottom: 5px;
   }
   .userCardModal {
     padding-top: 3px;
@@ -513,11 +598,13 @@ export default {
     margin-left: 0px;
     padding-left: 0px;
   }
-
+  .dampFile {
+    top: 125px;
+  }
 }
 @media screen and (max-width: 991px) {
-  .users {
-    top: 255px;
+  .titleUser {
+    font-size: 25px;
   }
   .inputSearch {
     margin-left: 0px;
@@ -526,11 +613,12 @@ export default {
   }
   .cardUser {
     height: 125px;
-    margin-bottom: 5px;
-    width: 216px;
+    padding: 5px;
+    margin-bottom: 15px;
+    font-size: 15px;
   }
-  .wrapperFilter: {
-    top: 175px; 
+  .wrapperFilter {
+    top: 90px!important; 
   }
   .btnSearch {
     padding: 8px 0px;
@@ -560,19 +648,18 @@ export default {
     width: 100%;
   }
   .paginationUser {
-    position: absolute;
-    top: 775px;
+    top: 580px;
   }
 }
 @media screen and (max-width: 767px) {
   .users {
-    top: 420px;
+    top: 480px;
   }
   .filterUser {
     display: block;
     margin-right: 20px;
     padding-left: 10px;
-    padding-top: 10px;    
+    padding-top: 5px;    
     margin-top: 10px;
     margin-bottom: 10px;
     padding-bottom: 10px;
@@ -593,18 +680,29 @@ export default {
     width: 97%;
     height: 45px;
   }
-  .btnWarning {
-    padding: 3px 3px;
-  }
   .btnSearch {
     width: 100%;
     margin-top: 10px;
     margin-bottom: 15px;
   }
+  .wrapperFilter {
+    margin-top: 10px;
+  }
   .warning {
     height: 12px;
     margin-top: 2px;
-    margin-bottom: 45px;
+    margin-bottom: 30px;
+  }
+  .btnWarning {
+    padding: 9px 3px;
+    width: 91%;
+  }
+  .dampFile {
+    top: 90px;
+    width: 91%;
+    margin-left: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
   }
   .iconProfile {
     width: 0px;
@@ -614,8 +712,9 @@ export default {
     height: 145px;
     padding-top: 10px;
     margin-top: 5px;
+    margin-left: 10px;
     margin-right: -12px;
-    width: 100%;
+    width: 97%;
   }
   .cardUserNumber {
     padding-left: 90%;
@@ -633,6 +732,21 @@ export default {
     position: absolute;
     top: 2300px;
     padding-bottom: 50px;
+  }
+  .boardMenu {
+    position: absolute;
+    z-index: 1;
+    margin-left: 10px;
+    min-height: 80px;
+    top: 330px;
+    left: 10px;
+    margin-bottom: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+  .paginationUser {
+    top: 2000px;
+    margin-left: 10px;
   }
 }
 
