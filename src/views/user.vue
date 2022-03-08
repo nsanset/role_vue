@@ -1,5 +1,5 @@
 <template>
-  <div class="user">
+  <div class="user" v-if="content.username != 'admin'">
     <span v-if="loading === true" class="loading animate__animated animate__fadeIn">
         <div class="overlays">
           <img style="border-radius: 50%;" src="../assets/Spinner-3.gif">
@@ -51,36 +51,31 @@
             <div class="info placeInfo">
               <div class="row">
                 <div class="column col-sm-3 avatarBlock">
-                  <div class="col-md-12">
                     <div v-if="avatar.length">
                       <img class="avatar" :src="'data:image/png;base64,' + avatar[0].avatar.data.toString('base64')"/>
                     </div>
                     <div v-else>
                       <img class="avatarEmpty" alt="logo profile" src="../assets/noavatar.png">
                     </div> 
-                  </div>
                 </div>
                 <div class="col-sm-5 column userNameInfo">
-                  <div class="col-md-12"><h4 class="userNameInfoText">{{firstName}} {{lastName}}</h4></div>
+                  <div class="col-md-12">
+                    <h4 class="userNameInfoText">{{content.firstName}} {{content.lastName}}</h4>
+                  </div>
                 </div>
                 <div class="col-sm-4 column d-flex justify-content-end status">
-                    <div class="row">
-                        <div class="col-md-4">
-                          <h4 class="statusText">Status:</h4>
-                        </div>
-                        <div class="col-md-8 statusForm">
+                  <div class="statusForm">
                           <form>
-                            <select v-model="status" value='status'>
-                              <option style="color: green;" value="active">Active</option>
-                              <option style="color: red;" value="disable">Inactive</option>
+                            <select v-model="content.status" value='content.status'>
+                              <option style="color: green;" value="active">Status: active</option>
+                              <option style="color: red;" value="disable">Status: inactive</option>
                             </select>
                             <button class="btnStatus" @click.prevent="setStatus(content._id)">
-                              <div class="btnStatusText" v-if="status === 'active'" style="background-color: #5D967F;">Change</div>
-                              <div class="btnStatusText" v-if="status === 'disable'" style="background-color: #ED6868;">Change</div>
+                              <div class="btnStatusText" v-if="content.status === 'active'" style="background-color: #5D967F;">Change</div>
+                              <div class="btnStatusText" v-if="content.status === 'disable'" style="background-color: #ED6868;">Change</div>
                             </button>
                           </form>
-                        </div>
-                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -90,55 +85,77 @@
               <div class="placeDocInfo">
                 <div v-if="activetab ==='1'" class="tabcontent animate__animated animate__fadeIn">
                     <div class="infoTitle">
-                      <h1>Info</h1>
+                      <h1 class="animate__animated animate__flash">Info
+                        <img class="icoDoc" src="../assets/info.png">
+                      </h1>
+                      <div class="dampFileUser">
+                          <json-excel
+                            :data = "userExel"
+                            :exportFields = "json_fields"
+                            worksheet = "Drivers"
+                            :name = '"Driver" + " " + content.firstName + " " + content.lastName'>
+                            <font-awesome-icon icon="download" /> Download Excel
+                          </json-excel>
+                      </div>
                     </div>
                     <div class="row">
-                      <div class="col-md-7 infoBlockLeft">
-                        <div class="infoItem" v-if="firstName"><span>First name:</span> {{firstName}}</div>
+                      <div class="col-md-6 infoBlockLeft">
+                        <div class="infoItem" v-if="content.firstName">
+                          <img class="icoInfo" src="../assets/ok.png">
+                          <span> First name:</span> {{content.firstName}}
+                        </div>
                         <div class="infoItem" v-else><font-awesome-icon class="infoWarningIcon" icon="exclamation-circle"/> Need to fill First name</div>
 
-                        <div class="infoItem" v-if="lastName"><span>Last name:</span> {{lastName}}</div>
+                        <div class="infoItem" v-if="content.lastName">
+                          <img class="icoInfo" src="../assets/ok.png">
+                          <span> Last name:</span> {{content.lastName}}
+                        </div>
                         <div class="infoItem" v-else><font-awesome-icon class="infoWarningIcon" icon="exclamation-circle"/> Need to fill Last name</div>
 
-                        <div class="infoItem" v-if="dateOfBirth"><span>Date of birth: </span>{{ dateOfBirth | moment("MM/DD/YYYY") }}</div>
-                        <div class="infoItem" v-else><font-awesome-icon class="infoWarningIcon" icon="exclamation-circle"/> Need to fill Date of birth</div>
+                        <div class="infoItem" v-if="content.dateOfBirth">
+                          <img class="icoInfo" src="../assets/ok.png">
+                          <span> Date of birth: </span>{{ content.dateOfBirth | moment("MM/DD/YYYY") }}
+                        </div>
+                        <div class="infoItem" v-else>
+                          <font-awesome-icon class="infoWarningIcon" icon="exclamation-circle"/>  Need to fill Date of birth
+                        </div>
 
-                        <div class="infoItem" v-if="socialSecurityNumber" ><span>Social security number:</span> {{socialSecurityNumber}}</div>
+                        <div class="infoItem" v-if="content.socialSecurityNumber" ><img class="icoInfo" src="../assets/ok.png"><span> Social security number:</span> {{ content.socialSecurityNumber}}</div>
                         <div class="infoItem" v-else><font-awesome-icon class="infoWarningIcon" icon="exclamation-circle"/> Need to fill Social security number</div>
 
-                        <div class="infoItem" v-if="driverLicenseNumber"><span>Driver license number:</span> {{driverLicenseNumber}}</div>
+                        <div class="infoItem" v-if="content.driverLicenseNumber"><img class="icoInfo" src="../assets/ok.png"><span> Driver license number:</span> {{ content.driverLicenseNumber}}</div>
                         <div class="infoItem" v-else><font-awesome-icon class="infoWarningIcon" icon="exclamation-circle"/> Need to fill Driver license number</div>
 
-                        <div class="infoItem" v-if="driverLicenseState"><span>Driver license state:</span> {{driverLicenseState}}</div>
+                        <div class="infoItem" v-if="content.driverLicenseState"><img class="icoInfo" src="../assets/ok.png"><span> Driver license state:</span> {{ content.driverLicenseState}}</div>
                         <div class="infoItem" v-else><font-awesome-icon class="infoWarningIcon" icon="exclamation-circle"/> Need to fill Driver license state</div>
 
-                        <div class="infoItem" v-if="driverLicenseIssueDate"><span>Driver license issue date:</span> {{ driverLicenseIssueDate | moment("MM/DD/YYYY") }}</div>
+                        <div class="infoItem" v-if="content.driverLicenseIssueDate"><img class="icoInfo" src="../assets/ok.png"><span> Driver license issue date:</span> {{ content.driverLicenseIssueDate | moment("MM/DD/YYYY") }}</div>
                         <div class="infoItem" v-else><font-awesome-icon class="infoWarningIcon" icon="exclamation-circle"/> Need to fill Driver license issue date</div>
 
-                        <div class="infoItem" v-if="endOfDateDriverLicense"><span>Driver Licence expired date:</span> {{ endOfDateDriverLicense | moment("MM/DD/YYYY") }}</div>
-                        <div class="infoItem" v-else><font-awesome-icon class="infoWarningIcon" icon="exclamation-circle"/> Data Driver Licence not specified</div>
+                        <div class="infoItem" v-if="content.endOfDateDriverLicense"><img class="icoInfo" src="../assets/ok.png"><span> Driver Licence expired date:</span> {{ content.endOfDateDriverLicense | moment("MM/DD/YYYY") }}</div>
+                        <div class="infoItem" v-else><font-awesome-icon class="infoWarningIcon" icon="exclamation-circle"/> Need to fill Driver license expired date</div>
 
-                        <div class="infoItem" v-if="homeAdress"><span>Home adress:</span> {{homeAdress}}</div>
+                        <div class="infoItem" v-if="content.homeAdress"><img class="icoInfo" src="../assets/ok.png"><span> Home adress:</span> {{content.homeAdress}}</div>
                         <div class="infoItem" v-else><font-awesome-icon class="infoWarningIcon" icon="exclamation-circle"/> Need to fill Home adress</div>
 
-                        <div class="infoItem" v-if="phoneNumber"><span>Phone number:</span> {{phoneNumber}}</div>
+                        <div class="infoItem" v-if="content.phoneNumber"><span> <img class="icoInfo" src="../assets/ok.png"> Phone number:</span> {{content.phoneNumber}}</div>
                         <div class="infoItem" v-else><font-awesome-icon class="infoWarningIcon" icon="exclamation-circle"/> Need to fill Phone number</div>
 
-                        <div class="infoItem" v-if="email"><span>Email:</span> {{email}}</div>
+                        <div class="infoItem" v-if="content.email"><img class="icoInfo" src="../assets/ok.png"><span> Email:</span> {{content.email}}</div>
                         <div class="infoItem" v-else><font-awesome-icon class="infoWarningIcon" icon="exclamation-circle"/> Need to fill Email</div>
                       </div>
-                      <div class="col-md-5 infoBlockRight">
-                        <div class="infoItem" v-if="employingCompany"><span>Employing company:</span> {{employingCompany}}</div>
+                      <div class="col-md-6 infoBlockRight">
+                        <div class="infoItem" v-if="content.employingCompany"><img class="icoInfo" src="../assets/ok.png"><span> Employing company:</span> {{content.employingCompany}}</div>
                         <div class="infoItem" v-else><font-awesome-icon class="infoWarningIcon" icon="exclamation-circle"/> Need to fill Employing company</div>
 
-                        <div class="infoItem" v-if="dateOfEmplouyment"><span>Date of employment:</span> {{ dateOfEmplouyment | moment("MM/DD/YYYY") }}</div>
+                        <div class="infoItem" v-if="content.dateOfEmplouyment"><img class="icoInfo" src="../assets/ok.png"><span> Date of employment:</span> {{ content.dateOfEmplouyment | moment("MM/DD/YYYY") }}</div>
                         <div class="infoItem" v-else><font-awesome-icon class="infoWarningIcon" icon="exclamation-circle"/> Need to fill Date of employment</div>
 
-                        <div class="infoItem" v-if="dateOfDismissal"><span>Date of dismissal:</span> {{ dateOfDismissal | moment("MM/DD/YYYY") }}</div>
+                        <div class="infoItem" v-if="content.dateOfDismissal"><img class="icoInfo" src="../assets/ok.png"><span> Date of dismissal:</span> {{ content.dateOfDismissal | moment("MM/DD/YYYY") }}</div>
 <!--                         <div class="infoItem" v-else><font-awesome-icon class="infoWarningIcon" icon="exclamation-circle"/> Need to fill Date of dismissal</div> -->
 
 
-                        <div class="infoItem infoComment" v-if="comment"><span>Comment:</span> {{comment}}</div>
+                        <div class="infoItem infoComment" v-if="content.comment"><span>Comment:</span> {{content.comment}}</div>
                       </div>
 
                         <!-- <div class="infoItem infoComment" v-if="comment"><span>Comment:</span> {{comment}}</div> -->
@@ -151,7 +168,7 @@
 
                 <div  v-if="activetab ==='2'" class="tabcontent animate__animated animate__fadeIn">
                   <div class="documentsTitle">
-                      <h1>Documents</h1>
+                      <h1 class="animate__animated animate__flash">Documents <img class="icoDoc" src="../assets/folder.png"></h1>
                   </div>
 
 
@@ -166,24 +183,24 @@
                               <h4 v-else style="color: #ED6868;">1. Driver Licence</h4>
                             </div> 
                             <div class="col-md-12 ">
-                              <div v-if="showDoc1" class="btnShowHide"  v-on:click="showDoc1 = !showDoc1">Show &#9660;</div>
-                              <div v-if="!showDoc1" class="btnShowHide" v-on:click="showDoc1 = !showDoc1">Hide &#9650;</div>
+                              <div v-if="showDoc1" class="btnShowHide"  v-on:click="showDoc1 = !showDoc1 || loadImages()">Show &#9660;</div>
+                              <div v-if="!showDoc1" class="btnShowHide" v-on:click="showDoc1 = !showDoc1" style="background-color: #ED6868;">Hide &#9650;</div>
                             </div>   
                           </div>
                         </div>
 
                         <div class="col-sm-4 infoDoc animate__animated animate__fadeIn">
-                          <div v-if="endOfDateDriverLicense" class="expiredDoc">
+                          <div v-if="content.endOfDateDriverLicense" class="expiredDoc">
                             <span v-if="!color.length" class="infoDocOk">
                               <font-awesome-icon icon="check-circle" />
                             </span>
                             <span v-else style="color: orange;" class="infoDocOk">
                               <font-awesome-icon icon="check-circle" />
                             </span> 
-                            Exp. {{ endOfDateDriverLicense | moment("MM/DD/YYYY") }}
+                            Exp. {{ content.endOfDateDriverLicense | moment("MM/DD/YYYY") }}
                           </div>
                           <div v-else class="animate__animated animate__fadeInLeft"><span class="infoDocWarning"><font-awesome-icon icon="exclamation-circle" /></span> Need set date</div>
-                          <div v-if="images.length" class="animate__animated animate__fadeInLeft">
+                          <div v-if="content.images.length" class="animate__animated animate__fadeInLeft">
                               <span class="totalImages"><span class="infoDocOk"><font-awesome-icon icon="check-circle" />
                               </span> {{lengthImages}} Downloaded</span>
                           </div>
@@ -196,29 +213,16 @@
                             <div class="row navDoc col-md-12">
                                 <div class="col-md-6">
                                     <form @submit.prevent>
-                                        <input type="file" name="img" v-on:change="onChange" :key="fileInputKey">
-                                        <button v-if="img" class="btnSubmit" @click="onUpload">Submit</button>
+                                      <div v-if="!img" class="fileUpload">
+                                        <input type="file" name="img" v-on:change="onChange" :key="fileInputKey" class="upload">
+                                        <span>Select File</span>
+                                      </div>
+                                      <button v-if="img" class="btnSubmit" @click="onUpload">Submit</button>
                                     </form>
                                 </div>
-                                <div  v-if="images.length" class="row col-md-4 animate__animated animate__bounceInRight">
-                                            <div>
-                                              <Countdown :date="content.endOfDateDriverLicense" @onFinish="finish()"></Countdown>
-                                              <form @submit.prevent>
-                                                <input type="hidden" v-model="endOfDateDriverLicense" name="dates" value="dates">
-                                                <input type="date" v-model="endOfDateDriverLicense" name="endOfDateDriverLicense" value="endOfDateDriverLicense">
-                                                <button v-if="endOfDateDriverLicense" class="btnSetDate animate__animated animate__fadeIn" @click="setDate(content._id, endOfDateDriverLicense)">Сonfirm</button>
-                                              </form>
-                                            </div>
-                                </div>                                            
-                                  <div v-if="endOfDateDriverLicense" class="col-md-2 animate__animated animate__fadeIn">
-                                      <form>
-                                          <input type="hidden" v-model="dates" name="dates" value="dates">
-                                          <button class="btnClearDate" @click.prevent="dateClearLiecenseDoc(content._id)">Clear date</button>
-                                      </form>
-                                  </div>
-<!--                                 <div v-if="images.length" class="col-md-1 animate__animated animate__bounceInRight">
-                                  <button @click="deleteImgAll(content._id)">Del all</button>
-                                </div>   -->                          
+                                <div>
+                                    <Countdown :date="content.endOfDateDriverLicense" @onFinish="finish()"></Countdown>
+                                </div>
                             </div>
 
                             <div class="col-md-12 imagesContainer">
@@ -251,24 +255,24 @@
                               <h4 v-else style="color: #ED6868;">2. Medical Card</h4>
                             </div> 
                             <div class="col-md-12">
-                              <div v-if="showDoc2" class="btnShowHide" v-on:click="showDoc2 = !showDoc2">Show &#9660;</div>
-                              <div v-if="!showDoc2" class="btnShowHide" v-on:click="showDoc2 = !showDoc2">Hide &#9650;</div>
+                              <div v-if="showDoc2" class="btnShowHide" v-on:click="showDoc2 = !showDoc2 || loadMedical()">Show &#9660;</div>
+                              <div v-if="!showDoc2" class="btnShowHide" v-on:click="showDoc2 = !showDoc2" style="background-color: #ED6868;">Hide &#9650;</div>
                             </div>   
                           </div>
                         </div>
 
                         <div class="col-sm-4 infoDoc animate__animated animate__fadeIn">
-                          <div v-if="endOfDateMedicalCard">
+                          <div v-if="content.endOfDateMedicalCard">
                             <span v-if="!color2.length" class="infoDocOk">
                               <font-awesome-icon icon="check-circle" />
                             </span>
                             <span v-else style="color: orange;" class="infoDocOk">
                               <font-awesome-icon icon="check-circle" />
                             </span>
-                            Exp. {{ endOfDateMedicalCard | moment("MM/DD/YYYY") }}
+                            Exp. {{ content.endOfDateMedicalCard | moment("MM/DD/YYYY") }}
                           </div>
                           <div v-else class="animate__animated animate__fadeInLeft"><span class="infoDocWarning"><font-awesome-icon icon="exclamation-circle" /></span> Need set date</div>
-                          <div v-if="medicals.length" class="animate__animated animate__fadeInLeft">        
+                          <div v-if="content.medicals.length" class="animate__animated animate__fadeInLeft">        
                             <span class="totalImages">
                               <span class="infoDocOk"><font-awesome-icon icon="check-circle" /></span> {{lengthMedicals}} Downloaded</span>
                           </div>
@@ -281,33 +285,20 @@
                             <div class="row navDoc col-md-12">
                                   <div class="col-md-6">
                                     <form @submit.prevent>
-                                        <input type="file" name="medicalCard" v-on:change="onChangeMedical" :key="fileInputKey">
-                                        <button v-if="medicalCard" class="btnSubmit" @click="onUploadMedical">Submit</button>
+                                      <div v-if="!medicalCard" class="fileUpload">
+                                        <input type="file" name="medicalCard" v-on:change="onChangeMedical" :key="fileInputKey" class="upload">
+                                        <span>Select File</span>
+                                      </div>
+                                      <button v-if="medicalCard" class="btnSubmit" @click="onUploadMedical">Submit</button>
                                     </form>
                                   </div>
-                                  <div v-if="medicals.length" class="row col-md-4 animate__animated animate__bounceInRight">
-                                            <div>
-                                              <Countdown :date="content.endOfDateMedicalCard" @onFinish="finish2()"></Countdown>
-                                              <form @submit.prevent>
-                                                <input type="hidden" v-model="endOfDateMedicalCard" name="dates" value="dates">
-                                                <input type="date" v-model="endOfDateMedicalCard" name="endOfDateMedicalCard" value="endOfDateMedicalCard">
-                                                <button v-if="endOfDateMedicalCard" class="btnSetDate animate__animated animate__fadeIn" @click="setDateMedical(content._id, endOfDateMedicalCard)">Confirm</button>
-                                              </form>
-                                            </div>
-                                    </div>                                            
-                                    <div v-if="endOfDateMedicalCard" class="col-md-2 animate__animated animate__fadeIn">
-                                        <form>
-                                            <input type="hidden" v-model="dates" name="dates" value="dates">
-                                            <button class="btnClearDate" @click.prevent="dateClearMedicalCard(content._id)">Clear date</button>
-                                        </form>
-                                    </div> 
-<!--                                     <div v-if="medicals.length" class="col-md-1 animate__animated animate__bounceInRight">
-                                        <button @click="deleteMedicalAll(content._id)">Del all</button>
-                                    </div> -->
+                                  <div>
+                                      <Countdown :date="content.endOfDateMedicalCard" @onFinish="finish2()"></Countdown>
+                                  </div>                                            
                             </div>
 
                             <div class="col-md-12 imagesContainer">
-                                  <div v-if="medicals.length" class="column animate__animated animate__fadeIn">
+                                  <div v-if="content.medicals.length" class="column animate__animated animate__fadeIn">
                                           <div class="row">
                                             <div class="col-sm-3" v-for="item in medicals" :key="item._id">
                                                 <img v-img:group2 class="imageDocument" :src="'data:image/png;base64,' + item.medicalCard.data.toString('base64')"/>
@@ -336,14 +327,14 @@
                               <h4 v-else style="color: #ED6868;">3. Social security card</h4>
                             </div> 
                             <div class="col-md-12 ">
-                              <div v-if="showDoc3" class="btnShowHide"  v-on:click="showDoc3 = !showDoc3">Show &#9660;</div>
-                              <div v-if="!showDoc3" class="btnShowHide" v-on:click="showDoc3 = !showDoc3">Hide &#9650;</div>
+                              <div v-if="showDoc3" class="btnShowHide"  v-on:click="showDoc3 = !showDoc3 || loadSecurity()">Show &#9660;</div>
+                              <div v-if="!showDoc3" class="btnShowHide" v-on:click="showDoc3 = !showDoc3" style="background-color: #ED6868;">Hide &#9650;</div>
                             </div>   
                           </div>
                         </div>
 
                         <div class="col-sm-4 infoDoc animate__animated animate__fadeIn">
-                          <div v-if="securitys.length" class="animate__animated animate__fadeInLeft">
+                          <div v-if="content.securitys.length" class="animate__animated animate__fadeInLeft">
                             <span class="totalImages">
                               <span class="infoDocOk">
                                 <font-awesome-icon icon="check-circle" />
@@ -357,8 +348,11 @@
                             <div class="row navDoc col-md-12">
                                   <div class="col-md-12">
                                     <form @submit.prevent>
-                                        <input type="file" name="security" v-on:change="onChangeSecurity" :key="fileInputKey">
-                                        <button v-if="security" class="btnSubmit" @click="onUploadSecurity">Submit</button>
+                                      <div v-if="!security" class="fileUpload">
+                                          <input type="file" name="security" v-on:change="onChangeSecurity" :key="fileInputKey" class="upload">
+                                          <span>Select File</span>
+                                      </div>
+                                      <button v-if="security" class="btnSubmit" @click="onUploadSecurity">Submit</button>
                                     </form>
                                   </div>
 <!--                                   <div v-if="securitys.length" class="col-md-2 animate__animated animate__bounceInRight">
@@ -366,7 +360,7 @@
                                   </div> -->
                             </div>
                             <div class="col-md-12 imagesContainer">
-                                  <div v-if="securitys.length" class="column animate__animated animate__fadeIn">
+                                  <div v-if="content.securitys.length" class="column animate__animated animate__fadeIn">
                                           <div class="row">
                                             <div class="col-sm-3" v-for="item in securitys" :key="item._id">
                                                 <div>
@@ -398,14 +392,14 @@
                               <h4 v-else style="color: #ED6868;">4. Driver's Application for Employment</h4>
                             </div> 
                             <div class="col-md-12 ">
-                              <div v-if="showDoc4" class="btnShowHide"  v-on:click="showDoc4 = !showDoc4">Show &#9660;</div>
-                              <div v-if="!showDoc4" class="btnShowHide" v-on:click="showDoc4 = !showDoc4">Hide &#9650;</div>
+                              <div v-if="showDoc4" class="btnShowHide"  v-on:click="showDoc4 = !showDoc4 || loadEmployment()">Show &#9660;</div>
+                              <div v-if="!showDoc4" class="btnShowHide" v-on:click="showDoc4 = !showDoc4" style="background-color: #ED6868;">Hide &#9650;</div>
                             </div>   
                           </div>
                         </div>
 
                         <div class="col-sm-4 infoDoc animate__animated animate__fadeIn">
-                          <div v-if="employments.length" class="animate__animated animate__fadeInLeft">
+                          <div v-if="content.employments.length" class="animate__animated animate__fadeInLeft">
                             <span class="totalImages">
                               <span class="infoDocOk"><font-awesome-icon icon="check-circle" />
                               </span> {{lengthEmployments}} Downloaded</span>
@@ -420,8 +414,11 @@
                                 <div class="col-md-12">
                                   <div>
                                     <form @submit.prevent>
-                                        <input type="file" name="employment" v-on:change="onChangeEmployment" :key="fileInputKey">
-                                        <button v-if="employment" class="btnSubmit" @click="onUploadEmployment">Submit</button>
+                                      <div v-if="!employment" class="fileUpload">
+                                          <input type="file" name="employment" v-on:change="onChangeEmployment" :key="fileInputKey" class="upload">
+                                          <span>Select File</span>
+                                      </div>
+                                      <button v-if="employment" class="btnSubmit" @click="onUploadEmployment">Submit</button>
                                     </form>
                                   </div>
                                 </div>
@@ -431,7 +428,7 @@
                             </div>
                             <div class="col-md-12 imagesContainer">
 
-                                  <div v-if="employments.length" class="column animate__animated animate__fadeIn">
+                                  <div v-if="content.employments.length" class="column animate__animated animate__fadeIn">
                                           <div class="row">
                                             <div class="col-sm-3" v-for="item in employments" :key="item._id">
                                                 <div>
@@ -462,14 +459,14 @@
                               <h4 v-else style="color: #ED6868;">5. W4 form (Application page 21)</h4>
                             </div> 
                             <div class="col-md-12 ">
-                              <div v-if="showDoc5" class="btnShowHide"  v-on:click="showDoc5 = !showDoc5">Show &#9660;</div>
-                              <div v-if="!showDoc5" class="btnShowHide" v-on:click="showDoc5 = !showDoc5">Hide &#9650;</div>
+                              <div v-if="showDoc5" class="btnShowHide"  v-on:click="showDoc5 = !showDoc5 || loadW4form()">Show &#9660;</div>
+                              <div v-if="!showDoc5" class="btnShowHide" v-on:click="showDoc5 = !showDoc5" style="background-color: #ED6868;">Hide &#9650;</div>
                             </div>   
                           </div>
                         </div>
 
                         <div class="col-sm-4 infoDoc animate__animated animate__fadeIn">
-                          <div v-if="w4forms.length" class="animate__animated animate__fadeInLeft">
+                          <div v-if="content.w4forms.length" class="animate__animated animate__fadeInLeft">
                             <span class="totalImages">
                               <span class="infoDocOk"><font-awesome-icon icon="check-circle" />
                               </span> {{lengthW4forms}} Downloaded</span>
@@ -484,8 +481,11 @@
                                 <div class="col-md-12">
                                   <div>
                                     <form @submit.prevent>
-                                        <input type="file" name="w4form" v-on:change="onChangeW4form" :key="fileInputKey">
-                                        <button v-if="w4form" class="btnSubmit" @click="onUploadW4form">Submit</button>
+                                      <div v-if="!w4form" class="fileUpload">
+                                          <input type="file" name="w4form" v-on:change="onChangeW4form" :key="fileInputKey" class="upload">
+                                          <span>Select File</span>
+                                      </div>
+                                      <button v-if="w4form" class="btnSubmit" @click="onUploadW4form">Submit</button>
                                     </form>
                                   </div>
                                 </div>
@@ -495,7 +495,7 @@
                             </div>
                             <div class="col-md-12 imagesContainer">
 
-                                  <div v-if="w4forms.length" class="column animate__animated animate__fadeIn">
+                                  <div v-if="content.w4forms.length" class="column animate__animated animate__fadeIn">
                                           <div class="row">
                                             <div class="col-sm-3" v-for="item in w4forms" :key="item._id">
                                                 <div>
@@ -527,14 +527,14 @@
                               <h4 v-else style="color: #ED6868;">6. Confidential info and Company Property Policy</h4>
                             </div> 
                             <div class="col-md-12 ">
-                              <div v-if="showDoc6" class="btnShowHide"  v-on:click="showDoc6 = !showDoc6">Show &#9660;</div>
-                              <div v-if="!showDoc6" class="btnShowHide" v-on:click="showDoc6 = !showDoc6">Hide &#9650;</div>
+                              <div v-if="showDoc6" class="btnShowHide"  v-on:click="showDoc6 = !showDoc6 || loadConfidential()">Show &#9660;</div>
+                              <div v-if="!showDoc6" class="btnShowHide" v-on:click="showDoc6 = !showDoc6" style="background-color: #ED6868;">Hide &#9650;</div>
                             </div>   
                           </div>
                         </div>
 
                         <div class="col-sm-4 infoDoc animate__animated animate__fadeIn">
-                          <div v-if="confidentials.length" class="animate__animated animate__fadeInLeft">
+                          <div v-if="content.confidentials.length" class="animate__animated animate__fadeInLeft">
                             <span class="totalImages">
                               <span class="infoDocOk"><font-awesome-icon icon="check-circle" />
                               </span> {{lengthConfidential}} Downloaded</span>
@@ -549,8 +549,11 @@
                                 <div class="col-md-12">
                                   <div>
                                     <form @submit.prevent>
-                                        <input type="file" name="confidential" v-on:change="onChangeConfidential" :key="fileInputKey">
-                                        <button v-if="confidential" class="btnSubmit" @click="onUploadConfidential">Submit</button>
+                                      <div v-if="!confidential" class="fileUpload">
+                                          <input type="file" name="confidential" v-on:change="onChangeConfidential" :key="fileInputKey" class="upload">
+                                          <span>Select File</span>
+                                      </div>
+                                      <button v-if="confidential" class="btnSubmit" @click="onUploadConfidential">Submit</button>
                                     </form>
                                   </div>
                                 </div>
@@ -560,7 +563,7 @@
                             </div>
                             <div class="col-md-12 imagesContainer">
 
-                                  <div v-if="confidentials.length" class="column animate__animated animate__fadeIn">
+                                  <div v-if="content.confidentials.length" class="column animate__animated animate__fadeIn">
                                           <div class="row">
                                             <div class="col-sm-3" v-for="item in confidentials" :key="item._id">
                                                 <div>
@@ -591,14 +594,14 @@
                               <h4 v-else style="color: #ED6868;">7. "TAKE-HOME" Company-owned Vehicle Policy</h4>
                             </div> 
                             <div class="col-md-12 ">
-                              <div v-if="showDoc7" class="btnShowHide"  v-on:click="showDoc7 = !showDoc7">Show &#9660;</div>
-                              <div v-if="!showDoc7" class="btnShowHide" v-on:click="showDoc7 = !showDoc7">Hide &#9650;</div>
+                              <div v-if="showDoc7" class="btnShowHide"  v-on:click="showDoc7 = !showDoc7 || loadOwned()">Show &#9660;</div>
+                              <div v-if="!showDoc7" class="btnShowHide" v-on:click="showDoc7 = !showDoc7" style="background-color: #ED6868;">Hide &#9650;</div>
                             </div>   
                           </div>
                         </div>
 
                         <div class="col-sm-4 infoDoc animate__animated animate__fadeIn">
-                          <div v-if="owneds.length" class="animate__animated animate__fadeInLeft">
+                          <div v-if="content.owneds.length" class="animate__animated animate__fadeInLeft">
                             <span class="totalImages">
                               <span class="infoDocOk"><font-awesome-icon icon="check-circle" /></span> {{lengthOwned}} Downloaded</span>
                           </div>
@@ -612,8 +615,11 @@
                                 <div class="col-md-12">
                                   <div>
                                     <form @submit.prevent>
-                                        <input type="file" name="owned" v-on:change="onChangeOwned" :key="fileInputKey">
-                                        <button v-if="owned" class="btnSubmit" @click="onUploadOwned">Submit</button>
+                                      <div v-if="!owned" class="fileUpload">
+                                        <input type="file" name="owned" v-on:change="onChangeOwned" :key="fileInputKey" class="upload">
+                                        <span>Select File</span>
+                                      </div>
+                                      <button v-if="owned" class="btnSubmit" @click="onUploadOwned">Submit</button>
                                     </form>
                                   </div>
                                 </div>
@@ -623,7 +629,7 @@
                             </div>
                             <div class="col-md-12 imagesContainer">
 
-                                  <div v-if="owneds.length" class="column animate__animated animate__fadeIn">
+                                  <div v-if="content.owneds.length" class="column animate__animated animate__fadeIn">
                                           <div class="row">
                                             <div class="col-sm-3" v-for="item in owneds" :key="item._id">
                                                 <div>
@@ -654,14 +660,14 @@
                               <h4 v-else style="color: #ED6868;">8. Hiring expenses agreement</h4>
                             </div> 
                             <div class="col-md-12 ">
-                              <div v-if="showDoc8" class="btnShowHide"  v-on:click="showDoc8 = !showDoc8">Show &#9660;</div>
-                              <div v-if="!showDoc8" class="btnShowHide" v-on:click="showDoc8 = !showDoc8">Hide &#9650;</div>
+                              <div v-if="showDoc8" class="btnShowHide"  v-on:click="showDoc8 = !showDoc8 || loadExpenses()">Show &#9660;</div>
+                              <div v-if="!showDoc8" class="btnShowHide" v-on:click="showDoc8 = !showDoc8" style="background-color: #ED6868;">Hide &#9650;</div>
                             </div>   
                           </div>
                         </div>
 
                         <div class="col-sm-4 infoDoc animate__animated animate__fadeIn">
-                          <div v-if="expensess.length" class="animate__animated animate__fadeInLeft">
+                          <div v-if="content.expensess.length" class="animate__animated animate__fadeInLeft">
                             <span class="totalImages">
                               <span class="infoDocOk"><font-awesome-icon icon="check-circle" />
                               </span> {{lengthExpenses}} Downloaded</span>
@@ -676,8 +682,11 @@
                                 <div class="col-md-12">
                                   <div>
                                     <form @submit.prevent>
-                                        <input type="file" name="expenses" v-on:change="onChangeExpenses" :key="fileInputKey">
-                                        <button v-if="expenses" class="btnSubmit" @click="onUploadExpenses">Submit</button>
+                                      <div v-if="!expenses" class="fileUpload">
+                                        <input type="file" name="expenses" v-on:change="onChangeExpenses" :key="fileInputKey" class="upload">
+                                        <span>Select File</span>
+                                      </div>
+                                      <button v-if="expenses" class="btnSubmit" @click="onUploadExpenses">Submit</button>
                                     </form>
                                   </div>
                                 </div>
@@ -687,7 +696,7 @@
                             </div>
                             <div class="col-md-12 imagesContainer">
 
-                                  <div v-if="expensess.length" class="column animate__animated animate__fadeIn">
+                                  <div v-if="content.expensess.length" class="column animate__animated animate__fadeIn">
                                           <div class="row">
                                             <div class="col-sm-3" v-for="item in expensess" :key="item._id">
                                                 <div>
@@ -717,14 +726,14 @@
                               <h4 v-else style="color: #ED6868;">9. Direct desposit form</h4>
                             </div> 
                             <div class="col-md-12 ">
-                              <div v-if="showDoc9" class="btnShowHide"  v-on:click="showDoc9 = !showDoc9">Show &#9660;</div>
-                              <div v-if="!showDoc9" class="btnShowHide" v-on:click="showDoc9 = !showDoc9">Hide &#9650;</div>
+                              <div v-if="showDoc9" class="btnShowHide"  v-on:click="showDoc9 = !showDoc9 || loadDesposit()">Show &#9660;</div>
+                              <div v-if="!showDoc9" class="btnShowHide" v-on:click="showDoc9 = !showDoc9" style="background-color: #ED6868;">Hide &#9650;</div>
                             </div>   
                           </div>
                         </div>
 
                         <div class="col-sm-4 infoDoc animate__animated animate__fadeIn">
-                          <div v-if="desposits.length" class="animate__animated animate__fadeInLeft">
+                          <div v-if="content.desposits.length" class="animate__animated animate__fadeInLeft">
                             <span class="totalImages">
                               <span class="infoDocOk"><font-awesome-icon icon="check-circle" />
                               </span> {{lengthDesposit}} Downloaded</span>
@@ -739,8 +748,11 @@
                                 <div class="col-md-12">
                                   <div>
                                     <form @submit.prevent>
-                                        <input type="file" name="desposit" v-on:change="onChangeDesposit" :key="fileInputKey">
-                                        <button v-if="desposit" class="btnSubmit" @click="onUploadDesposit">Submit</button>
+                                      <div v-if="!desposit" class="fileUpload">
+                                        <input type="file" name="desposit" v-on:change="onChangeDesposit" :key="fileInputKey" class="upload">
+                                        <span>Select File</span>
+                                      </div>
+                                      <button v-if="desposit" class="btnSubmit" @click="onUploadDesposit">Submit</button>
                                     </form>
                                   </div>
                                 </div>
@@ -750,7 +762,7 @@
                             </div>
                             <div class="col-md-12 imagesContainer">
 
-                                  <div v-if="desposits.length" class="column animate__animated animate__fadeIn">
+                                  <div v-if="content.desposits.length" class="column animate__animated animate__fadeIn">
                                           <div class="row">
                                             <div class="col-sm-3" v-for="item in desposits" :key="item._id">
                                                 <div>
@@ -781,14 +793,14 @@
                               <h4 v-else style="color: #ED6868;">10. Fair credit (Application page 16)</h4>
                             </div> 
                             <div class="col-md-12 ">
-                              <div v-if="showDoc10" class="btnShowHide"  v-on:click="showDoc10 = !showDoc10">Show &#9660;</div>
-                              <div v-if="!showDoc10" class="btnShowHide" v-on:click="showDoc10 = !showDoc10">Hide &#9650;</div>
+                              <div v-if="showDoc10" class="btnShowHide"  v-on:click="showDoc10 = !showDoc10 || loadCredit()">Show &#9660;</div>
+                              <div v-if="!showDoc10" class="btnShowHide" v-on:click="showDoc10 = !showDoc10" style="background-color: #ED6868;">Hide &#9650;</div>
                             </div>   
                           </div>
                         </div>
 
                         <div class="col-sm-4 infoDoc animate__animated animate__fadeIn">
-                          <div v-if="credits.length" class="animate__animated animate__fadeInLeft">
+                          <div v-if="content.credits.length" class="animate__animated animate__fadeInLeft">
                             <span class="totalImages">
                               <span class="infoDocOk"><font-awesome-icon icon="check-circle" />
                               </span> {{lengthCredit}} Downloaded</span>
@@ -803,8 +815,11 @@
                                 <div class="col-md-12">
                                   <div>
                                     <form @submit.prevent>
-                                        <input type="file" name="credit" v-on:change="onChangeCredit" :key="fileInputKey">
-                                        <button v-if="credit" class="btnSubmit" @click="onUploadCredit">Submit</button>
+                                      <div v-if="!credit" class="fileUpload">
+                                        <input type="file" name="credit" v-on:change="onChangeCredit" :key="fileInputKey" class="upload">
+                                        <span>Select File</span>
+                                      </div>
+                                      <button v-if="credit" class="btnSubmit" @click="onUploadCredit">Submit</button>
                                     </form>
                                   </div>
                                 </div>
@@ -814,7 +829,7 @@
                             </div>
                             <div class="col-md-12 imagesContainer">
 
-                                  <div v-if="credits.length" class="column animate__animated animate__fadeIn">
+                                  <div v-if="content.credits.length" class="column animate__animated animate__fadeIn">
                                           <div class="row">
                                             <div class="col-sm-3" v-for="item in credits" :key="item._id">
                                                 <div>
@@ -845,14 +860,14 @@
                               <h4 v-else style="color: #ED6868;">11. Employment eligiibity verification</h4>
                             </div> 
                             <div class="col-md-12 ">
-                              <div v-if="showDoc11" class="btnShowHide"  v-on:click="showDoc11 = !showDoc11">Show &#9660;</div>
-                              <div v-if="!showDoc11" class="btnShowHide" v-on:click="showDoc11 = !showDoc11">Hide &#9650;</div>
+                              <div v-if="showDoc11" class="btnShowHide"  v-on:click="showDoc11 = !showDoc11 || loadEligiibity()">Show &#9660;</div>
+                              <div v-if="!showDoc11" class="btnShowHide" v-on:click="showDoc11 = !showDoc11" style="background-color: #ED6868;">Hide &#9650;</div>
                             </div>   
                           </div>
                         </div>
 
                         <div class="col-sm-4 infoDoc animate__animated animate__fadeIn">
-                          <div v-if="eligiibitys.length" class="animate__animated animate__fadeInLeft">
+                          <div v-if="content.eligiibitys.length" class="animate__animated animate__fadeInLeft">
                             <span class="totalImages">
                               <span class="infoDocOk"><font-awesome-icon icon="check-circle" />
                               </span> {{lengthEligiibity}} Downloaded</span>
@@ -867,8 +882,11 @@
                                 <div class="col-md-12">
                                   <div>
                                     <form @submit.prevent>
-                                        <input type="file" name="eligiibity" v-on:change="onChangeEligiibity" :key="fileInputKey">
-                                        <button v-if="eligiibity" class="btnSubmit" @click="onUploadEligiibity">Submit</button>
+                                      <div v-if="!eligiibity" class="fileUpload">
+                                        <input type="file" name="eligiibity" v-on:change="onChangeEligiibity" :key="fileInputKey" class="upload">
+                                        <span>Select File</span>
+                                      </div>
+                                      <button v-if="eligiibity" class="btnSubmit" @click="onUploadEligiibity">Submit</button>
                                     </form>
                                   </div>
                                 </div>
@@ -878,7 +896,7 @@
                             </div>
                             <div class="col-md-12 imagesContainer">
 
-                                  <div v-if="eligiibitys.length" class="column animate__animated animate__fadeIn">
+                                  <div v-if="content.eligiibitys.length" class="column animate__animated animate__fadeIn">
                                           <div class="row">
                                             <div class="col-sm-3" v-for="item in eligiibitys" :key="item._id">
                                                 <div>
@@ -907,14 +925,14 @@
                               <h4 v-else style="color: #ED6868;">12. Drug test</h4>
                             </div> 
                             <div class="col-md-12 ">
-                              <div v-if="showDoc12" class="btnShowHide"  v-on:click="showDoc12 = !showDoc12">Show &#9660;</div>
-                              <div v-if="!showDoc12" class="btnShowHide" v-on:click="showDoc12 = !showDoc12">Hide &#9650;</div>
+                              <div v-if="showDoc12" class="btnShowHide"  v-on:click="showDoc12 = !showDoc12 || loadDrug()">Show &#9660;</div>
+                              <div v-if="!showDoc12" class="btnShowHide" v-on:click="showDoc12 = !showDoc12" style="background-color: #ED6868;">Hide &#9650;</div>
                             </div>   
                           </div>
                         </div>
 
                         <div class="col-sm-4 infoDoc animate__animated animate__fadeIn">
-                          <div v-if="drugs.length" class="animate__animated animate__fadeInLeft">
+                          <div v-if="content.drugs.length" class="animate__animated animate__fadeInLeft">
                             <span class="totalImages">
                               <span class="infoDocOk"><font-awesome-icon icon="check-circle" />
                               </span> {{lengthDrug}} Downloaded</span>
@@ -929,8 +947,11 @@
                                 <div class="col-md-12">
                                   <div>
                                     <form @submit.prevent>
-                                        <input type="file" name="drug" v-on:change="onChangeDrug" :key="fileInputKey">
-                                        <button v-if="drug" class="btnSubmit" @click="onUploadDrug">Submit</button>
+                                      <div v-if="!drug" class="fileUpload">
+                                        <input type="file" name="drug" v-on:change="onChangeDrug" :key="fileInputKey" class="upload">
+                                        <span>Select File</span>
+                                      </div>
+                                      <button v-if="drug" class="btnSubmit" @click="onUploadDrug">Submit</button>
                                     </form>
                                   </div>
                                 </div>
@@ -940,7 +961,7 @@
                             </div>
                             <div class="col-md-12 imagesContainer">
 
-                                  <div v-if="drugs.length" class="column animate__animated animate__fadeIn">
+                                  <div v-if="content.drugs.length" class="column animate__animated animate__fadeIn">
                                           <div class="row">
                                             <div class="col-sm-3" v-for="item in drugs" :key="item._id">
                                                 <div>
@@ -969,14 +990,14 @@
                               <h4 v-else style="color: #ED6868;">13. MVR</h4>
                             </div> 
                             <div class="col-md-12 ">
-                              <div v-if="showDoc14" class="btnShowHide"  v-on:click="showDoc14 = !showDoc14">Show &#9660;</div>
-                              <div v-if="!showDoc14" class="btnShowHide" v-on:click="showDoc14 = !showDoc14">Hide &#9650;</div>
+                              <div v-if="showDoc14" class="btnShowHide"  v-on:click="showDoc14 = !showDoc14 || loadMvr()">Show &#9660;</div>
+                              <div v-if="!showDoc14" class="btnShowHide" v-on:click="showDoc14 = !showDoc14" style="background-color: #ED6868;">Hide &#9650;</div>
                             </div>   
                           </div>
                         </div>
 
                         <div class="col-sm-4 infoDoc animate__animated animate__fadeIn">
-                          <div v-if="mvrs.length" class="animate__animated animate__fadeInLeft">
+                          <div v-if="content.mvrs.length" class="animate__animated animate__fadeInLeft">
                             <span class="totalImages">
                               <span class="infoDocOk"><font-awesome-icon icon="check-circle" />
                               </span> {{lengthMvr}} Downloaded</span>
@@ -991,8 +1012,11 @@
                                 <div class="col-md-12">
                                   <div>
                                     <form @submit.prevent>
-                                        <input type="file" name="mvr" v-on:change="onChangeMvr" :key="fileInputKey">
-                                        <button v-if="mvr" class="btnSubmit" @click="onUploadMvr">Submit</button>
+                                      <div v-if="!mvr" class="fileUpload">
+                                        <input type="file" name="mvr" v-on:change="onChangeMvr" :key="fileInputKey" class="upload">
+                                        <span>Select File</span>
+                                      </div>
+                                      <button v-if="mvr" class="btnSubmit" @click="onUploadMvr">Submit</button>
                                     </form>
                                   </div>
                                 </div>
@@ -1002,7 +1026,7 @@
                             </div>
                             <div class="col-md-12 imagesContainer">
 
-                                  <div v-if="mvrs.length" class="column animate__animated animate__fadeIn">
+                                  <div v-if="content.mvrs.length" class="column animate__animated animate__fadeIn">
                                           <div class="row">
                                             <div class="col-sm-3" v-for="item in mvrs" :key="item._id">
                                                 <div>
@@ -1032,14 +1056,14 @@
                               <h4 v-else style="color: #ED6868;">14. Another document</h4>
                             </div> 
                             <div class="col-md-12 ">
-                              <div v-if="showDoc13" class="btnShowHide"  v-on:click="showDoc13 = !showDoc13">Show &#9660;</div>
-                              <div v-if="!showDoc13" class="btnShowHide" v-on:click="showDoc13 = !showDoc13">Hide &#9650;</div>
+                              <div v-if="showDoc13" class="btnShowHide"  v-on:click="showDoc13 = !showDoc13 || loadAnother()">Show &#9660;</div>
+                              <div v-if="!showDoc13" class="btnShowHide" v-on:click="showDoc13 = !showDoc13" style="background-color: #ED6868;">Hide &#9650;</div>
                             </div>   
                           </div>
                         </div>
 
                         <div class="col-sm-4 infoDoc animate__animated animate__fadeIn">
-                          <div v-if="anothers.length" class="animate__animated animate__fadeInLeft">
+                          <div v-if="content.anothers.length" class="animate__animated animate__fadeInLeft">
                             <span class="totalImages">
                               <span class="infoDocOk"><font-awesome-icon icon="check-circle" />
                               </span> {{lengthAnother}} Downloaded</span>
@@ -1054,7 +1078,10 @@
                                 <div class="col-md-12">
                                   <div>
                                     <form @submit.prevent>
-                                        <input type="file" name="another" v-on:change="onChangeAnother" :key="fileInputKey">
+                                      <div v-if="!another" class="fileUpload">
+                                        <input type="file" name="another" v-on:change="onChangeAnother" :key="fileInputKey" class="upload">
+                                        <span>Select File</span>
+                                      </div>
                                         <button v-if="another" class="btnSubmit" @click="onUploadAnother">Submit</button>
                                     </form>
                                   </div>
@@ -1065,13 +1092,82 @@
                             </div>
                             <div class="col-md-12 imagesContainer">
 
-                                  <div v-if="anothers.length" class="column animate__animated animate__fadeIn">
+                                  <div v-if="content.anothers.length" class="column animate__animated animate__fadeIn">
                                           <div class="row">
                                             <div class="col-sm-3" v-for="item in anothers" :key="item._id">
                                                 <div>
                                                   <img v-img:group13 class="imageDocument" :src="'data:image/png;base64,' + item.another.data.toString('base64')"/>
                                                   <button class="btnDelete" @click="deleteAnother(item._id)">Delete</button>
                                                 </div>                    
+                                            </div>
+                                          </div>
+                                  </div>
+                            </div>     
+                          </div> 
+                        </div> 
+                    </div>
+                  </div>
+
+
+
+
+
+
+                  <!-- DOC 15 -->
+                  <div class="placeDoc">
+                    <div>
+                      <div class="row headerDoc">
+                        <div class="row col-sm-8">
+                          <div class="column animate__animated animate__fadeIn">
+                            <div class="col-md-12 nameDocument">
+                              <h4 v-if="!showDoc15 === false">15. PDF files</h4>
+                              <h4 v-else style="color: #ED6868;">15. PDF files</h4>
+                            </div> 
+                            <div class="col-md-12 ">
+                              <div v-if="showDoc15" class="btnShowHide"  v-on:click="showDoc15 = !showDoc15 || loadPDF()">Show &#9660;</div>
+                              <div v-if="!showDoc15" class="btnShowHide" v-on:click="showDoc15 = !showDoc15" style="background-color: #ED6868;">Hide &#9650;</div>
+                            </div>   
+                          </div>
+                        </div>
+
+                        <div class="col-sm-4 infoDoc animate__animated animate__fadeIn">
+                          <div v-if="content.files.length" class="animate__animated animate__fadeInLeft">
+                            <span class="totalImages">
+                              <span class="infoDocOk"><font-awesome-icon icon="check-circle" />
+                              </span> {{lengthFiles}} Downloaded</span>
+                          </div>
+                          <div v-else class="animate__animated animate__fadeInLeft"><span class="infoDocWarning"><font-awesome-icon icon="exclamation-circle" /></span> No files</div>
+                        </div>
+                          
+                      </div>
+                      <div v-show="!showDoc15">                       
+                        <div class="row"> 
+                            <div class="row navDoc col-md-12">
+                                <div class="col-md-12">
+                                  <div>
+                                      <form @submit.prevent>
+                                        <div v-if="!file" class="fileUpload">
+                                            <input type="file" name="file" v-on:change="onChangeFile" accept="application/pdf" :key="fileInputKey" class="upload"> <span>Select File</span>
+                                        </div>
+                                        <input v-if="file" placeholder="write the file name before saving" type="text" name="fileName" size="30" v-model="nameFile">
+                                        <span v-if="nameFile">
+                                            <button v-if="file" class="btnSubmit" @click="onUploadFile">Save file</button>
+                                        </span>
+                                          
+                                      </form>
+                                  </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 imagesContainer">
+                                  <div v-if="content.files.length" class="column animate__animated animate__fadeIn">
+                                          <div class="row">
+                                            <div :class="{act: isActive}" class="col-sm-3" v-for="item in files" :key="item._id">
+                                                <!-- <font-awesome-icon icon="file-pdf" /> -->
+                                                <img class="icoDocPDF" src="../assets/pdf.png">
+                                                <div>File name: {{item.fileName}}</div>
+                                                <div>File size: {{item.fileSize}}</div>
+                                                <a :href="urlPDF + item.filePath" target="_blank"><div class="btnOpenFile">Open</div></a>
+                                                <button class="btnDelete" @click="deletePDF(item._id, item.filePath)">Delete</button>               
                                             </div>
                                           </div>
                                   </div>
@@ -1087,7 +1183,10 @@
 
                 <div v-if="activetab ==='3'" class="tabcontent animate__animated animate__slideInUp">
                   <div class="documentsSetting">
-                      <h1>Setting</h1>
+                      <h1>Setting 
+                        <img class="icoDoc" src="../assets/setting.png">
+                      </h1>
+
 <!--                       <button class="btnDeleteUser" @click="deleteUser(content._id)">&#128465; Delete driver</button> -->
                               <div class="modalWrapperDeleteUser">
                                 <button @click="showModal = true" class="btnDeleteUser">&#128465; Delete driver</button>
@@ -1107,8 +1206,8 @@
                       <div class="itemSetting">
                         <div class="settingTitle">First name</div>
                         <form>
-                          <input type="text" v-model="firstName" size="32" value='firstName'>
-                          <button v-if="firstName" class="btnСonfirmSetting animate__animated animate__fadeInDown" @click.prevent="setFirstName(content._id, firstName)">Сonfirm</button>
+                          <input type="text" v-model="content.firstName" size="32" value='content.firstName' class="inputSetting">
+                          <button v-if="content.firstName" class="btnСonfirmSetting animate__animated animate__fadeInDown" @click.prevent="setFirstName(content._id, content.firstName)">Сonfirm</button>
 <!--                           <button v-if="firstName" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="firstNameClear(content._id)">Clear</button> -->
                         </form>
                       </div>
@@ -1116,8 +1215,8 @@
                       <div class="itemSetting">
                         <div class="settingTitle">Last name</div>
                         <form>
-                          <input type="text" v-model="lastName" size="32" value='lastName'>
-                          <button v-if="lastName" class="btnСonfirmSetting animate__animated animate__fadeInDown" @click.prevent="setLastName(content._id)">Сonfirm</button>
+                          <input type="text" v-model="content.lastName" size="32" value='content.lastName' class="inputSetting">
+                          <button v-if="content.lastName" class="btnСonfirmSetting animate__animated animate__fadeInDown" @click.prevent="setLastName(content._id)">Сonfirm</button>
 <!--                           <button v-if="lastName" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="lastNameClear(content._id)">Clear</button> -->
                         </form>
                       </div>
@@ -1126,9 +1225,12 @@
                       <div class="itemSetting">
                         <div class="settingTitle">Date of birth</div>
                         <form>
-                          <input type="date"  v-model="dateOfBirth" value='dateOfBirth'>
-                          <button v-if="dateOfBirth" class="btnСonfirmSettingDate animate__animated animate__fadeInDown" @click.prevent="setDateOfBirth(content._id)">Сonfirm</button>
-                          <button v-if="dateOfBirth" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="dateOfBirthClear(content._id)">Clear</button>
+                          <!-- <input type="date" v-model="content.dateOfBirth" class="inputSetting"> -->
+                          <date-picker v-model="content.dateOfBirth" lang="en" format="MM/DD/YYYY"></date-picker>
+                          <div v-if="content.dateOfBirth" class="itemSettingInfo">{{content.dateOfBirth | moment("MM/DD/YYYY")}}</div>
+                          <div v-else class="itemSettingInfo"> &#10094; choose a date</div>
+                          <button v-if="content.dateOfBirth" class="btnСonfirmSettingDate animate__animated animate__fadeInDown" @click.prevent="setDateOfBirth(content._id)">Сonfirm</button>
+                          <button v-if="content.dateOfBirth" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="dateOfBirthClear(content._id)">Clear</button>
                         </form>
                       </div>
 
@@ -1136,9 +1238,9 @@
                       <div class="itemSetting">
                         <div class="settingTitle">Social security number</div>
                         <form>
-                          <input type="text" v-model="socialSecurityNumber" size="32" value='socialSecurityNumber'>
-                          <button v-if="socialSecurityNumber" class="btnСonfirmSetting animate__animated animate__fadeInDown" @click.prevent="setSocialSecurityNumber(content._id)">Сonfirm</button>
-                          <button v-if="socialSecurityNumber" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="socialSecurityNumberClear(content._id)">Clear</button>
+                          <input type="text" v-model="content.socialSecurityNumber" size="32" value='content.socialSecurityNumber' class="inputSetting">
+                          <button v-if="content.socialSecurityNumber" class="btnСonfirmSetting animate__animated animate__fadeInDown" @click.prevent="setSocialSecurityNumber(content._id)">Сonfirm</button>
+                          <button v-if="content.socialSecurityNumber" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="socialSecurityNumberClear(content._id)">Clear</button>
                         </form>
                       </div>
 
@@ -1146,9 +1248,9 @@
                       <div class="itemSetting">
                         <div class="settingTitle">Driver license number</div>
                         <form>
-                          <input type="text" v-model="driverLicenseNumber" size="32" value='driverLicenseNumber'>
-                          <button v-if="driverLicenseNumber" class="btnСonfirmSetting animate__animated animate__fadeInDown" @click.prevent="setDriverLicenseNumber(content._id)">Сonfirm</button>
-                          <button v-if="driverLicenseNumber" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="driverLicenseNumberClear(content._id)">Clear</button>
+                          <input type="text" v-model="content.driverLicenseNumber" size="32" value='content.driverLicenseNumber' class="inputSetting">
+                          <button v-if="content.driverLicenseNumber" class="btnСonfirmSetting animate__animated animate__fadeInDown" @click.prevent="setDriverLicenseNumber(content._id)">Сonfirm</button>
+                          <button v-if="content.driverLicenseNumber" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="driverLicenseNumberClear(content._id)">Clear</button>
                         </form>
                       </div>
 
@@ -1156,20 +1258,37 @@
                       <div class="itemSetting">
                         <div class="settingTitle">Driver license state</div>
                         <form>
-                          <input type="text" v-model="driverLicenseState" size="32" value='driverLicenseState'>
-                          <button v-if="driverLicenseState" class="btnСonfirmSetting animate__animated animate__fadeInDown" @click.prevent="setDriverLicenseState(content._id)">Сonfirm</button>
-                          <button v-if="driverLicenseState" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="driverLicenseStateClear(content._id)">Clear</button>
+                          <input type="text" v-model="content.driverLicenseState" size="32" value='content.driverLicenseState' class="inputSetting">
+                          <button v-if="content.driverLicenseState" class="btnСonfirmSetting animate__animated animate__fadeInDown" @click.prevent="setDriverLicenseState(content._id)">Сonfirm</button>
+                          <button v-if="content.driverLicenseState" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="driverLicenseStateClear(content._id)">Clear</button>
                         </form>
                       </div>
 
                       <div class="itemSetting">
                         <div class="settingTitle">Driver license issue date</div>
                           <form>
-                            <input type="date" v-model="driverLicenseIssueDate" size="32" value='driverLicenseIssueDate'>
-                            <button v-if="driverLicenseIssueDate" class="btnСonfirmSettingDate animate__animated animate__fadeInDown" @click.prevent="setDriverLicenseIssueDate(content._id)">Сonfirm</button>
-                            <button v-if="driverLicenseIssueDate" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="driverLicenseIssueDateClear(content._id)">Clear</button>
+                            <!-- <input type="date" v-model="content.driverLicenseIssueDate" size="32" class="inputSetting"> -->
+                            <date-picker v-model="content.driverLicenseIssueDate" lang="en" format="MM/DD/YYYY"></date-picker>
+                            <div v-if="content.driverLicenseIssueDate" class="itemSettingInfo">{{content.driverLicenseIssueDate | moment("MM/DD/YYYY")}}</div>
+                            <div v-else class="itemSettingInfo"> &#10094; choose a date</div>
+                            <button v-if="content.driverLicenseIssueDate" class="btnСonfirmSettingDate animate__animated animate__fadeInDown" @click.prevent="setDriverLicenseIssueDate(content._id)">Сonfirm</button>
+                            <button v-if="content.driverLicenseIssueDate" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="driverLicenseIssueDateClear(content._id)">Clear</button>
                           </form>
                       </div>
+
+
+                      <div class="itemSetting">
+                        <div class="settingTitle">Driver license expired date</div>
+                            <form @submit.prevent>
+                                <!-- <input type="date" v-model="content.endOfDateDriverLicense" name="content.endOfDateDriverLicense" class="inputSetting"> -->
+                                <date-picker v-model="content.endOfDateDriverLicense" lang="en" format="MM/DD/YYYY"></date-picker>
+                                <div v-if="content.endOfDateDriverLicense" class="itemSettingInfo">{{content.endOfDateDriverLicense | moment("MM/DD/YYYY")}}</div>
+                                <div v-else class="itemSettingInfo"> &#10094; choose a date</div>
+                                <button v-if="content.endOfDateDriverLicense" class="btnСonfirmSettingDate animate__animated animate__fadeInDown" @click="setDate(content._id, content.endOfDateDriverLicense)">Сonfirm</button>
+                                <button v-if="content.endOfDateDriverLicense" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="dateClearLiecenseDoc(content._id)">Clear</button>
+                            </form>                                  
+                      </div>
+
                     </div>
 
 
@@ -1178,11 +1297,24 @@
 
 
                     <div class="itemSetting">
+                        <div class="settingTitle">Medical card expired date </div>
+                            <form @submit.prevent>
+                               <!--  <input type="date" v-model="content.endOfDateMedicalCard" name="content.endOfDateMedicalCard" class="inputSetting"> -->
+                                <date-picker v-model="content.endOfDateMedicalCard" lang="en" format="MM/DD/YYYY"></date-picker>
+                                <div v-if="content.endOfDateMedicalCard" class="itemSettingInfo">{{content.endOfDateMedicalCard | moment("MM/DD/YYYY")}}</div>
+                                <div v-else class="itemSettingInfo"> &#10094; choose a date</div>
+                                <button v-if="content.endOfDateMedicalCard" class="btnСonfirmSettingDate animate__animated animate__fadeInDown" @click="setDateMedical(content._id, content.endOfDateMedicalCard)">Confirm</button>
+                                <button v-if="content.endOfDateMedicalCard" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="dateClearMedicalCard(content._id)">Clear</button>
+                            </form>                                 
+                    </div>
+
+
+                    <div class="itemSetting">
                         <div class="settingTitle">Home adress</div>
                         <form>
-                          <input type="text" v-model="homeAdress" size="32" value='homeAdress'>
-                          <button v-if="homeAdress" class="btnСonfirmSetting animate__animated animate__fadeInDown" @click.prevent="setHomeAdress(content._id)">Сonfirm</button>
-                          <button v-if="homeAdress" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="homeAdressClear(content._id)">Clear</button>
+                          <input type="text" v-model="content.homeAdress" size="32" value='content.homeAdress' class="inputSetting">
+                          <button v-if="content.homeAdress" class="btnСonfirmSetting animate__animated animate__fadeInDown" @click.prevent="setHomeAdress(content._id)">Сonfirm</button>
+                          <button v-if="content.homeAdress" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="homeAdressClear(content._id)">Clear</button>
                         </form>
                     </div>
 
@@ -1190,9 +1322,9 @@
                     <div class="itemSetting">
                         <div class="settingTitle">Phone number</div>
                         <form>
-                          <input type="text" v-model="phoneNumber" size="32" value='phoneNumber'>
-                          <button v-if="phoneNumber" class="btnСonfirmSetting animate__animated animate__fadeInDown" @click.prevent="setPhoneNumber(content._id)">Сonfirm</button>
-                          <button v-if="phoneNumber" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="phoneNumberClear(content._id)">Clear</button>
+                          <input type="text" v-model="content.phoneNumber" size="32" value='content.phoneNumber' class="inputSetting">
+                          <button v-if="content.phoneNumber" class="btnСonfirmSetting animate__animated animate__fadeInDown" @click.prevent="setPhoneNumber(content._id)">Сonfirm</button>
+                          <button v-if="content.phoneNumber" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="phoneNumberClear(content._id)">Clear</button>
                         </form>
                     </div>
 
@@ -1201,9 +1333,9 @@
                     <div class="itemSetting">
                         <div class="settingTitle">Email</div>
                         <form> 
-                          <input type="text" v-model="email" size="32" value='email'>
-                          <button v-if="email" class="btnСonfirmSetting animate__animated animate__fadeInDown" @click.prevent="setEmail(content._id)">Сonfirm</button>
-                          <button v-if="email" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="emailClear(content._id)">Clear</button>
+                          <input type="text" v-model="content.email" size="32" value='content.email' class="inputSetting">
+                          <button v-if="content.email" class="btnСonfirmSetting animate__animated animate__fadeInDown" @click.prevent="setEmail(content._id)">Сonfirm</button>
+                          <button v-if="content.email" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="emailClear(content._id)">Clear</button>
                         </form>
                     </div>
 
@@ -1213,9 +1345,9 @@
                     <div class="itemSetting">
                         <div class="settingTitle">Employing company</div>
                         <form>
-                          <input type="text" v-model="employingCompany" size="32" value='employingCompany'>
-                          <button v-if="employingCompany" class="btnСonfirmSetting animate__animated animate__fadeInDown" @click.prevent="setEmployingCompany(content._id)">Сonfirm</button>
-                          <button v-if="employingCompany" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="employingCompanyClear(content._id)">Clear</button>
+                          <input type="text" v-model="content.employingCompany" size="32" value='content.employingCompany' class="inputSetting">
+                          <button v-if="content.employingCompany" class="btnСonfirmSetting animate__animated animate__fadeInDown" @click.prevent="setEmployingCompany(content._id)">Сonfirm</button>
+                          <button v-if="content.employingCompany" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="employingCompanyClear(content._id)">Clear</button>
                         </form>
                     </div>
 
@@ -1223,9 +1355,12 @@
                     <div class="itemSetting">
                         <div class="settingTitle">Date of employment</div>
                         <form>
-                          <input type="date" v-model="dateOfEmplouyment" value='dateOfEmplouyment'>
-                          <button v-if="dateOfEmplouyment" class="btnСonfirmSettingDate animate__animated animate__fadeInDown" @click.prevent="setDateOfEmplouyment(content._id)">Сonfirm</button>
-                          <button v-if="dateOfEmplouyment" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="dateOfEmplouymentClear(content._id)">Clear</button>
+                          <!-- <input type="date" v-model="content.dateOfEmplouyment" class="inputSetting"> -->
+                          <date-picker v-model="content.dateOfEmplouyment" lang="en" format="MM/DD/YYYY"></date-picker>
+                          <div v-if="content.dateOfEmplouyment" class="itemSettingInfo">{{content.dateOfEmplouyment | moment("MM/DD/YYYY")}}</div>
+                          <div v-else class="itemSettingInfo"> &#10094; choose a date</div>
+                          <button v-if="content.dateOfEmplouyment" class="btnСonfirmSettingDate animate__animated animate__fadeInDown" @click.prevent="setDateOfEmplouyment(content._id)">Сonfirm</button>
+                          <button v-if="content.dateOfEmplouyment" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="dateOfEmplouymentClear(content._id)">Clear</button>
                         </form>
                     </div>
 
@@ -1233,11 +1368,19 @@
                     <div class="itemSetting">
                       <div class="settingTitle">Date of dismissal</div>
                       <form>
-                          <input type="date" v-model="dateOfDismissal" value='dateOfDismissal'>
-                          <button v-if="dateOfDismissal" class="btnСonfirmSettingDate animate__animated animate__fadeInDown" @click.prevent="setDateOfDismissal(content._id)">Сonfirm</button>
-                          <button v-if="dateOfDismissal" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="dateOfDismissalClear(content._id)">Clear</button>
+                          <!-- <input  type="date" v-model="content.dateOfDismissal" class="inputSetting"> -->
+                          <date-picker v-model="content.dateOfDismissal" lang="en" format="MM/DD/YYYY"></date-picker>
+                          <div v-if="content.dateOfDismissal" class="itemSettingInfo">{{content.dateOfDismissal | moment("MM/DD/YYYY")}}</div>
+                          <div v-else class="itemSettingInfo"> &#10094; choose a date</div>
+                          <button v-if="content.dateOfDismissal" class="btnСonfirmSettingDate animate__animated animate__fadeInDown" @click.prevent="setDateOfDismissal(content._id)">Сonfirm</button>
+                          <button v-if="content.dateOfDismissal" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="dateOfDismissalClear(content._id)">Clear</button>
                         </form>
                     </div>
+<!--                     <div>
+                      <date-picker v-model="content.dateOfDismissal" lang="en" format="MM/DD/YYYY"></date-picker>
+                    </div> -->
+
+
 
 
                     <div class="itemSetting">
@@ -1247,10 +1390,14 @@
                                 <button class="btnDellAvatar animate__animated animate__fadeInDown" @click="deleteAvatar(item._id)">Delete avatar</button>    
                               </div>           
                         </div>
+
                         <div v-else> 
                               <div >
                                 <form @submit.prevent>
-                                  <input type="file" name="avatar" v-on:change="onChangeAvatar" :key="fileInputKey">
+                                  <div v-if="!avatarUpl" class="fileUpload">
+                                    <input type="file" name="avatar" v-on:change="onChangeAvatar" :key="fileInputKey" class="upload">
+                                    <span>Select File</span>
+                                  </div>
                                   <button v-if="avatarUpl" class="btnAddAvatar animate__animated animate__fadeInDown" @click="onUploadAvatar">Add avatar</button>
                                 </form>
                               </div>
@@ -1263,9 +1410,9 @@
                     <div class="settingComment"> 
                       <div class="settingTitle">Comment</div>
                       <form>
-                        <textarea v-model="comment" value='comment' rows="3"></textarea>
-                        <button v-if="comment" class="btnСonfirmSetting animate__animated animate__fadeInDown" @click.prevent="setComment(content._id)">Сonfirm</button>
-                        <button v-if="comment" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="commentClear(content._id)">Clear</button>
+                        <textarea v-model="content.comment" value='content.comment' rows="3"></textarea>
+                        <button v-if="content.comment" class="btnСonfirmSetting animate__animated animate__fadeInDown" @click.prevent="setComment(content._id)">Сonfirm</button>
+                        <button v-if="content.comment" class="btnClearSetiing animate__animated animate__fadeInDown" @click.prevent="commentClear(content._id)">Clear</button>
                       </form>
                      
                     </div>
@@ -1281,11 +1428,16 @@
       </div>     
     </div>
   </div>
+  <div v-else>
+    <router-link style="text-decoration: none; color: inherit;" :to="'/admin'">
+      <div>Go to admin board</div>
+    </router-link>
+  </div>
 </template>
 <script>
-const url = 'http://31.172.69.136:3000/'
+const url = 'http://62.113.98.37:3000/'
 // 'http://localhost:3000/'
-// 'http://31.172.69.136:3000/'
+// 'http://62.113.98.37:3000/'
 const vueImgConfig = {
   // Use `alt` attribute as gallery slide title
   altAsTitle: false,
@@ -1296,6 +1448,8 @@ const vueImgConfig = {
   // Show thumbnails for all groups with more than 1 image
   thumbnails: true,
 }
+import DatePicker from 'vue2-datepicker';
+import 'vue2-datepicker/index.css';
 import moment from 'moment'
 
 Vue.prototype.moment = moment
@@ -1309,14 +1463,45 @@ Vue.use(Toasted);
 import axios from 'axios';
 import authHeader from '../services/auth-header';
 import Countdown from '../components/Countdown';
+
+import JsonExcel from 'vue-json-excel'
+
 export default {
-  name: 'User1',
+  name: 'User',
   components: {
-    Countdown
+    Countdown, JsonExcel, DatePicker
   },
   data() {
     return {
-      content: '',
+      fileName:"Driver.xls",
+      json_fields: {
+        "First name": 'firstName',
+        "Last name": 'lastName',
+        "Date of birth": 'dateOfBirth',
+        "Social security number": 'socialSecurityNumber',
+        "Driver license number": 'driverLicenseNumber',
+        "Driver license state": 'driverLicenseState',
+        "Driver license issue date": 'driverLicenseIssueDate',
+        "Driver Licence expired date": 'endOfDateDriverLicense',
+        "Home adress": 'homeAdress',
+        "Phone number": 'phoneNumber',
+        "Email": 'email',
+        "Employing company": 'employingCompany',
+        "Date of employment": 'dateOfEmplouyment',
+        "Date of dismissal": 'dateOfDismissal',
+        "Comment": 'comment'
+      },
+      json_meta: [
+        [
+          {
+            'key': 'charset',
+            'value': 'utf-8'
+          }
+        ]
+      ],
+      content: [],
+      urlPDF: 'http://62.113.98.37:3000/all/',
+      isActive: false,
       loading: false,
       fileInputKey: 0,
       showModal: false,
@@ -1335,25 +1520,7 @@ export default {
       showDoc12: true,
       showDoc13: true,
       showDoc14: true,
-      status: '',
-      username: '',
-      email: '',
-      firstName: '',
-      lastName: '',
-      dateOfBirth: '',
-      socialSecurityNumber: '',
-      driverLicenseNumber: '',
-      driverLicenseState: '',
-      driverLicenseIssueDate: '',
-      homeAdress: '',
-      phoneNumber: '',
-      employingCompany: '',
-      dateOfEmplouyment: '',
-      dateOfDismissal: '',
-      endOfDateDriverLicense: '',
-      endOfDateMedicalCard: '',
-      comment: '',
-      dates: '',
+      showDoc15: true,
       images: '',
       medicals: '',
       avatar: '',
@@ -1386,123 +1553,119 @@ export default {
       drug: '',
       mvr: '',
       another: '',
+      files: '',
+      file: '',
+      nameFile: '',
       avatarUpl: '',
     }
   },
   computed: {
-    timestamp() {
-      return moment(this.endOfDateDriverLicense).format('MM/DD/YYYY')
+    userExel() {
+      var result = [{
+        firstName: this.content.firstName,
+        lastName: this.content.lastName,
+        dateOfBirth: this.content.dateOfBirth,
+        socialSecurityNumber: this.content.socialSecurityNumber,
+        driverLicenseNumber: this.content.driverLicenseNumber,
+        driverLicenseState: this.content.driverLicenseState,
+        driverLicenseIssueDate: this.content.driverLicenseIssueDate,
+        endOfDateDriverLicense: this.content.endOfDateDriverLicense,
+        homeAdress: this.content.homeAdress,
+        phoneNumber: this.content.phoneNumber,
+        email: this.content.email,
+        employingCompany: this.content.employingCompany,
+        dateOfEmplouyment: this.content.dateOfEmplouyment,
+        dateOfDismissal: this.content.dateOfDismissal,
+        comment: this.content.comment
+      }]
+      return result 
     },
+    // timestamp() {
+    //   return moment(this.endOfDateDriverLicense).format('MM/DD/YYYY')
+    // },
     lengthImages() {
-      return this.images.length
+      return this.content.images.length
     },
     lengthMedicals() {
-      return this.medicals.length
+      return this.content.medicals.length
     },
     lengthSecuritys() {
-      return this.securitys.length
+      return this.content.securitys.length
     },
     lengthEmployments() {
-      return this.employments.length
+      return this.content.employments.length
     },
     lengthW4forms() {
-      return this.w4forms.length
+      return this.content.w4forms.length
     },
     lengthConfidential() {
-      return this.confidentials.length
+      return this.content.confidentials.length
     },
     lengthOwned() {
-      return this.owneds.length
+      return this.content.owneds.length
     },
     lengthExpenses() {
-      return this.expensess.length
+      return this.content.expensess.length
     },
     lengthDesposit() {
-      return this.desposits.length
+      return this.content.desposits.length
     },
     lengthCredit() {
-      return this.credits.length
+      return this.content.credits.length
     },
     lengthEligiibity() {
-      return this.eligiibitys.length
+      return this.content.eligiibitys.length
     },
     lengthDrug() {
-      return this.drugs.length
+      return this.content.drugs.length
     },
     lengthMvr() {
-      return this.mvrs.length
+      return this.content.mvrs.length
     },
     lengthAnother() {
-      return this.anothers.length
+      return this.content.anothers.length
+    },
+    lengthFiles() {
+      return this.content.files.length
     }
   },
   mounted() {
     // all data
     this.getData()
     //driver licence
-    this.getendOfDateDriverLicense()
-    this.getImages()
-    //get status
-    this.getStatus()
-    //get username
-    this.getUsername()
-    //get Email
-    this.getEmail()
-    //get first name
-    this.getFirstName()
-    //get last name
-    this.getLastName()
-    //get date of birth
-    this.getDateOfBirth()
-    //get socialSecurityNumber
-    this.getSocialSecurityNumber()
-    //get Driver License Number
-    this.getDriverLicenseNumber()
-    //get driver License State
-    this.getDriverLicenseState()
-    //get driver License Issue Date
-    this.getDriverLicenseIssueDate()
-    //get home Adress
-    this.getHomeAdress()
-    //get phone Number
-    this.getPhoneNumber()
-    //get employing Company
-    this.getEmployingCompany()
-    //get date Of Emplouyment
-    this.getDateOfEmplouyment()
-    //get date Of Dismissal
-    this.getDateOfDismissal()
-    //get comment
-    this.getComment()
+    // this.getendOfDateDriverLicense()
+    // this.getImages()
     //medical card
-    this.getendOfDateMedicalCard()
-    this.getMedicals()
-    //security card
-    this.getSecurity()
-    //employment card
-    this.getEmployments()
-    //w4form
-    this.getW4forms()
-    //Confidentials
-    this.getConfidentials()
-    //Owned
-    this.getOwneds()
-    //Expenses 
-    this.getExpensess()
-    //desposit 
-    this.getDesposits()
-    //credit 
-    this.getCredits()
-    //eligiibity 
-    this.getEligiibitys()
-    //drug 
-    this.getDrugs()
-    //mvr 
-    this.getMvrs()
-    //another 
-    this.getAnothers()
+    // this.getendOfDateMedicalCard()
+    // this.getMedicals()
+    // //security card
+    // this.getSecurity()
+    // //employment card
+    // this.getEmployments()
+    // //w4form
+    // this.getW4forms()
+    // //Confidentials
+    // this.getConfidentials()
+    // //Owned
+    // this.getOwneds()
+    // //Expenses 
+    // this.getExpensess()
+    // //desposit 
+    // this.getDesposits()
+    // //credit 
+    // this.getCredits()
+    // //eligiibity 
+    // this.getEligiibitys()
+    // //drug 
+    // this.getDrugs()
+    // //mvr 
+    // this.getMvrs()
+    // //another 
+    // this.getAnothers()
     //get avatar
     this.getAvatar()
+    // //get file/pdf
+    // this.getFile()
   },
   methods: {
       // input clear
@@ -1552,6 +1715,9 @@ export default {
         }
         else if (this.avatarUpl) {
           this.avatarUpl = null;
+        }
+        else if (this.file) {
+          this.file = null;
         }
       },
       //show end documents
@@ -1605,18 +1771,11 @@ export default {
     },
 
     // username
-    getUsername() {
-        axios
-          .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
-          .then(response => (this.username = response.data.username));
-    },
-
     setUsername(id) {
         const updateData = { username: this.username }
         axios
           .put(url + 'user/' + id, updateData, { headers: authHeader()})
           .then(() => {
-            this.getUsername()
             Vue.toasted.show('username', {
               theme: "toasted-primary",
               position: "top-right",
@@ -1635,18 +1794,11 @@ export default {
 
 
     // first name
-    getFirstName() {
-        axios
-          .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
-          .then(response => (this.firstName = response.data.firstName));
-    },
-
     setFirstName(id, name) {
-        const updateData = { firstName: this.firstName }
+        const updateData = { firstName: this.content.firstName }
         axios
           .put(url + 'user/' + id, updateData, { headers: authHeader()})
           .then(() => {
-            this.getLastName()
             Vue.toasted.show('First name changed! &#9989;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -1664,7 +1816,7 @@ export default {
         axios
           .put(url + 'user/' + id, update, { headers: authHeader()})
           .then(() => {
-            this.getFirstName()
+            this.getData()
             Vue.toasted.show('First name clear &#10060;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -1674,18 +1826,11 @@ export default {
       },
 
     // last name
-    getLastName() {
-        axios
-          .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
-          .then(response => (this.lastName = response.data.lastName));
-    },
-
     setLastName(id) {
-        const updateData = { lastName: this.lastName }
+        const updateData = { lastName: this.content.lastName }
         axios
           .put(url + 'user/' + id, updateData, { headers: authHeader()})
           .then(() => {
-            this.getLastName()
             Vue.toasted.show('last name changed &#9989;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -1709,18 +1854,11 @@ export default {
 
 
     // email
-    getEmail() {
-        axios
-          .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
-          .then(response => (this.email = response.data.email));
-    },
-
     setEmail(id) {
-        const updateData = { email: this.email }
+        const updateData = { email: this.content.email }
         axios
           .put(url + 'user/' + id, updateData, { headers: authHeader()})
           .then(() => {
-            this.getEmail()
             Vue.toasted.show('Email changed &#9989;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -1733,7 +1871,7 @@ export default {
         axios
           .put(url + 'user/' + id, update, { headers: authHeader()})
           .then(() => {
-            this.getEmail()
+            this.getData()
             Vue.toasted.show('Email clear &#10060;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -1745,18 +1883,12 @@ export default {
 
 
     // date of birth
-    getDateOfBirth() {
-        axios
-          .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
-          .then(response => (this.dateOfBirth = response.data.dateOfBirth));
-    },
-
     setDateOfBirth(id) {
-        const updateData = { dateOfBirth: this.dateOfBirth }
+        // const updateData = { dateOfBirth: this.dateOfBirth }
+        const updateData = { dateOfBirth: moment(this.content.dateOfBirth, 'YYYY-MM-DD').format('MM/DD/YYYY') }
         axios
           .put(url + 'user/' + id, updateData, { headers: authHeader()})
           .then(() => {
-            this.getDateOfBirth()
             Vue.toasted.show('Date of birth changed &#9989;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -1769,7 +1901,7 @@ export default {
         axios
           .put(url + 'user/' + id, update, { headers: authHeader()})
           .then(() => {
-            this.getDateOfBirth()
+            this.getData()
             Vue.toasted.show('Date of birth clear &#10060;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -1780,18 +1912,11 @@ export default {
 
 
     // socialSecurityNumber
-    getSocialSecurityNumber() {
-        axios
-          .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
-          .then(response => (this.socialSecurityNumber = response.data.socialSecurityNumber));
-    },
-
     setSocialSecurityNumber(id) {
-        const updateData = { socialSecurityNumber: this.socialSecurityNumber }
+        const updateData = { socialSecurityNumber: this.content.socialSecurityNumber }
         axios
           .put(url + 'user/' + id, updateData, { headers: authHeader()})
           .then(() => {
-            this.getSocialSecurityNumber()
             Vue.toasted.show('Social security number changed &#9989;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -1804,7 +1929,7 @@ export default {
         axios
           .put(url + 'user/' + id, update, { headers: authHeader()})
           .then(() => {
-            this.getSocialSecurityNumber()
+            this.getData()
             Vue.toasted.show('Social security number clear &#10060;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -1815,18 +1940,11 @@ export default {
 
 
     // Driver License Number
-    getDriverLicenseNumber() {
-        axios
-          .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
-          .then(response => (this.driverLicenseNumber = response.data.driverLicenseNumber));
-    },
-
     setDriverLicenseNumber(id) {
-        const updateData = { driverLicenseNumber: this.driverLicenseNumber }
+        const updateData = { driverLicenseNumber: this.content.driverLicenseNumber }
         axios
           .put(url + 'user/' + id, updateData, { headers: authHeader()})
           .then(() => {
-            this.getDriverLicenseNumber()
             Vue.toasted.show('Driver license number changed &#9989;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -1839,7 +1957,7 @@ export default {
         axios
           .put(url + 'user/' + id, update, { headers: authHeader()})
           .then(() => {
-            this.getDriverLicenseNumber()
+            this.getData()
             Vue.toasted.show('Driver license number clear &#10060;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -1850,18 +1968,11 @@ export default {
 
 
     // driver License State
-    getDriverLicenseState() {
-        axios
-          .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
-          .then(response => (this.driverLicenseState = response.data.driverLicenseState));
-    },
-
     setDriverLicenseState(id) {
-        const updateData = { driverLicenseState: this.driverLicenseState }
+        const updateData = { driverLicenseState: this.content.driverLicenseState }
         axios
           .put(url + 'user/' + id, updateData, { headers: authHeader()})
           .then(() => {
-            this.getDriverLicenseState()
             Vue.toasted.show('Driver license state changed &#9989;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -1875,7 +1986,7 @@ export default {
         axios
           .put(url + 'user/' + id, update, { headers: authHeader()})
           .then(() => {
-            this.getDriverLicenseState()
+            this.getData()
             Vue.toasted.show('Driver license state clear &#10060;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -1887,18 +1998,12 @@ export default {
 
 
     // driver License Issue Date
-    getDriverLicenseIssueDate() {
-        axios
-          .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
-          .then(response => (this.driverLicenseIssueDate = response.data.driverLicenseIssueDate));
-    },
-
     setDriverLicenseIssueDate(id) {
-        const updateData = { driverLicenseIssueDate: this.driverLicenseIssueDate }
+        const updateData = { driverLicenseIssueDate: moment(this.content.driverLicenseIssueDate, 'YYYY-MM-DD').format('MM/DD/YYYY') }
+        console.log(updateData)
         axios
           .put(url + 'user/' + id, updateData, { headers: authHeader()})
           .then(() => {
-            this.getDriverLicenseIssueDate()
             Vue.toasted.show('Driver license issue date changed &#9989;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -1912,7 +2017,7 @@ export default {
         axios
           .put(url + 'user/' + id, update, { headers: authHeader()})
           .then(() => {
-            this.getDriverLicenseIssueDate()
+            this.getData()
             Vue.toasted.show('Driver license issue date clear &#10060;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -1924,18 +2029,12 @@ export default {
 
 
     // driver License Issue Date
-    getHomeAdress() {
-        axios
-          .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
-          .then(response => (this.homeAdress = response.data.homeAdress));
-    },
 
     setHomeAdress(id) {
-        const updateData = { homeAdress: this.homeAdress }
+        const updateData = { homeAdress: this.content.homeAdress }
         axios
           .put(url + 'user/' + id, updateData, { headers: authHeader()})
           .then(() => {
-            this.getHomeAdress()
             Vue.toasted.show('Home adress changed &#9989;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -1949,7 +2048,7 @@ export default {
         axios
           .put(url + 'user/' + id, update, { headers: authHeader()})
           .then(() => {
-            this.getHomeAdress()
+            this.getData()
             Vue.toasted.show('Home adress clear &#10060;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -1960,18 +2059,11 @@ export default {
 
 
     // phone Number
-    getPhoneNumber() {
-        axios
-          .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
-          .then(response => (this.phoneNumber = response.data.phoneNumber));
-    },
-
     setPhoneNumber(id) {
-        const updateData = { phoneNumber: this.phoneNumber }
+        const updateData = { phoneNumber: this.content.phoneNumber }
         axios
           .put(url + 'user/' + id, updateData, { headers: authHeader()})
           .then(() => {
-            this.getPhoneNumber()
             Vue.toasted.show('Phone number changed &#9989;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -1985,7 +2077,7 @@ export default {
         axios
           .put(url + 'user/' + id, update, { headers: authHeader()})
           .then(() => {
-            this.getPhoneNumber()
+            this.getData()
             Vue.toasted.show('Phone number clear &#10060;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -1996,18 +2088,11 @@ export default {
 
 
     // employing Company
-    getEmployingCompany() {
-        axios
-          .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
-          .then(response => (this.employingCompany = response.data.employingCompany));
-    },
-
     setEmployingCompany(id) {
-        const updateData = { employingCompany: this.employingCompany }
+        const updateData = { employingCompany: this.content.employingCompany }
         axios
           .put(url + 'user/' + id, updateData, { headers: authHeader()})
           .then(() => {
-            this.getEmployingCompany()
             Vue.toasted.show('Employing company changed &#9989;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -2021,7 +2106,7 @@ export default {
         axios
           .put(url + 'user/' + id, update, { headers: authHeader()})
           .then(() => {
-            this.getEmployingCompany()
+            this.getData()
             Vue.toasted.show('Employing company clear &#10060;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -2032,18 +2117,11 @@ export default {
 
 
     // employing Company
-    getDateOfEmplouyment() {
-        axios
-          .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
-          .then(response => (this.dateOfEmplouyment = response.data.dateOfEmplouyment));
-    },
-
     setDateOfEmplouyment(id) {
-        const updateData = { dateOfEmplouyment: this.dateOfEmplouyment }
+        const updateData = { dateOfEmplouyment: moment(this.content.dateOfEmplouyment, 'YYYY-MM-DD').format('MM/DD/YYYY') }
         axios
           .put(url + 'user/' + id, updateData, { headers: authHeader()})
           .then(() => {
-            this.getDateOfEmplouyment()
             Vue.toasted.show('Date of employment changed &#9989;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -2057,7 +2135,7 @@ export default {
         axios
           .put(url + 'user/' + id, update, { headers: authHeader()})
           .then(() => {
-            this.getDateOfEmplouyment()
+            this.getData()
             Vue.toasted.show('Date of employment clear &#10060;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -2068,18 +2146,11 @@ export default {
 
 
     // date Of Dismissal
-    getDateOfDismissal() {
-        axios
-          .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
-          .then(response => (this.dateOfDismissal = response.data.dateOfDismissal));
-    },
-
     setDateOfDismissal(id) {
-        const updateData = { dateOfDismissal: this.dateOfDismissal }
+        const updateData = { dateOfDismissal: moment(this.content.dateOfDismissal, 'YYYY-MM-DD').format('MM/DD/YYYY')}
         axios
           .put(url + 'user/' + id, updateData, { headers: authHeader()})
           .then(() => {
-            this.getDateOfDismissal()
             Vue.toasted.show('Date of dismissal changed &#9989;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -2093,7 +2164,7 @@ export default {
         axios
           .put(url + 'user/' + id, update, { headers: authHeader()})
           .then(() => {
-            this.getDateOfDismissal()
+            this.getData()
             Vue.toasted.show('Date of dismissal clear &#10060;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -2104,18 +2175,11 @@ export default {
 
 
     // comment
-    getComment() {
-        axios
-          .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
-          .then(response => (this.comment = response.data.comment));
-    },
-
     setComment(id) {
-        const updateData = { comment: this.comment }
+        const updateData = { comment: this.content.comment }
         axios
           .put(url + 'user/' + id, updateData, { headers: authHeader()})
           .then(() => {
-            this.getComment()
             Vue.toasted.show('Сomment added &#128173; &#9989;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -2128,7 +2192,7 @@ export default {
         axios
           .put(url + 'user/' + id, update, { headers: authHeader()})
           .then(() => {
-            this.getComment()
+            this.getData()
             Vue.toasted.show('Сomment deleted &#10060;', {
               theme: "toasted-primary",
               position: "top-right",
@@ -2140,21 +2204,20 @@ export default {
 
             
     // set status
-    getStatus() {
-        axios
-          .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
-          .then(response => (this.status = response.data.status));
-    },
+    // getStatus() {
+    //     axios
+    //       .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
+    //       .then(response => (this.status = response.data.status));
+    // },
     setStatus(id) {
         // this.dateClear(id)
         // this.dateClearMedical(id)
-        const updateData = { status: this.status }
+        const updateData = { status: this.content.status }
         axios
           .put(url + 'user/' + id, updateData, { headers: authHeader()})
           .then(() => {
-            this.getendOfDateDriverLicense()
-            this.getendOfDateMedicalCard()
-            Vue.toasted.show("Status " + this.status + "&#9989;", {
+            this.getData()
+            Vue.toasted.show("Status " + this.content.status + "&#9989;", {
               theme: "toasted-primary",
               position: "top-right",
               duration: 3000,
@@ -2224,18 +2287,20 @@ export default {
 
 
       // driver license
+      loadImages(){
+        this.getImages()
+      },
       getImages() {
         axios
           .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
-          .then(response => (
-            this.images = response.data.images));
+          .then(response => (this.images = response.data.images));
           this.loading = false
       },
-      getendOfDateDriverLicense() {
-        axios
-          .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
-          .then(response => (this.endOfDateDriverLicense = response.data.endOfDateDriverLicense));
-      },
+      // getendOfDateDriverLicense() {
+      //   axios
+      //     .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
+      //     .then(response => (this.endOfDateDriverLicense = response.data.endOfDateDriverLicense));
+      // },
       onChange (event) {
         this.img = event.target.files[0]
       },
@@ -2253,6 +2318,7 @@ export default {
               duration: 3000,
             });          
             this.getImages()
+            this.getData()
           })
         } else {console.log("empty")}
       },
@@ -2268,7 +2334,8 @@ export default {
               duration: 3000,
             });            
             this.getImages()
-            this.getendOfDateDriverLicense()
+            // this.getendOfDateDriverLicense()
+            this.getData()
           });
       },
       deleteImgAll(id) {
@@ -2283,14 +2350,15 @@ export default {
               duration: 3000,
             });
             this.getImages()
-            this.getendOfDateDriverLicense()
+            // this.getendOfDateDriverLicense()
           });
       },
       setDate(id, date) {
-        const update = { endOfDateDriverLicense: this.endOfDateDriverLicense }
+        const update = { endOfDateDriverLicense: moment(this.content.endOfDateDriverLicense, 'YYYY-MM-DD').format('MM/DD/YYYY')}
         axios
           .put(url + 'user/' + id, update, { headers: authHeader()})
           .then(() => {
+            this.getData()
             Vue.toasted.show("Date driver licence date: " + moment(date).format('MM/DD/YYYY'), {
               theme: "toasted-primary",
               position: "top-right",
@@ -2299,11 +2367,12 @@ export default {
           });
       },
       dateClearLiecenseDoc(id) {
-        const update = { endOfDateDriverLicense: this.dates }
+        const update = { endOfDateDriverLicense: this.empty }
         axios
           .put(url + 'user/' + id, update, { headers: authHeader()})
           .then(() => {
-            this.getendOfDateDriverLicense()
+            // this.getendOfDateDriverLicense()
+            this.getData()
             Vue.toasted.show("Date driver licence clear &#10060;", {
               theme: "toasted-primary",
               position: "top-right",
@@ -2312,7 +2381,7 @@ export default {
           });
       },
       dateClear(id) {
-        const update = { endOfDateDriverLicense: this.dates }
+        const update = { endOfDateDriverLicense: this.empty }
         axios
           .put(url + 'user/' + id, update, { headers: authHeader()})
           .then(() => {
@@ -2321,17 +2390,20 @@ export default {
 
 
       // medical card
+      loadMedical() {
+        this.getMedicals()
+      },
       getMedicals() {
         axios
           .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
           .then(response => (this.medicals = response.data.medicals));
         this.loading = false
       },
-      getendOfDateMedicalCard() {
-        axios
-          .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
-          .then(response => (this.endOfDateMedicalCard = response.data.endOfDateMedicalCard));
-      },
+      // getendOfDateMedicalCard() {
+      //   axios
+      //     .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
+      //     .then(response => (this.endOfDateMedicalCard = response.data.endOfDateMedicalCard));
+      // },
       onChangeMedical (event) {
         this.medicalCard = event.target.files[0]
       },
@@ -2349,6 +2421,7 @@ export default {
               duration: 3000,
             });
             this.getMedicals()
+            this.getData()
           })
         } else {console.log("empty")}
       },
@@ -2364,7 +2437,8 @@ export default {
               duration: 3000,
             });            
             this.getMedicals()
-            this.getendOfDateMedicalCard()
+            this.getData()
+            // this.getendOfDateMedicalCard()
           });
       },
       deleteMedicalAll(id) {
@@ -2373,7 +2447,7 @@ export default {
           .delete(url + 'user/medical/', { headers: authHeader()})
           .then(() => {
             this.getMedicals()
-            this.getendOfDateMedicalCard()
+            // this.getendOfDateMedicalCard()
             Vue.toasted.show("All images deleted", {
               theme: "toasted-primary",
               position: "top-right",
@@ -2382,10 +2456,11 @@ export default {
           });
       },
       setDateMedical(id, date) {
-        const update = { endOfDateMedicalCard: this.endOfDateMedicalCard }
+        const update = { endOfDateMedicalCard: moment(this.content.endOfDateMedicalCard, 'YYYY-MM-DD').format('MM/DD/YYYY')}
         axios
           .put(url + 'user/' + id, update, { headers: authHeader()})
           .then(() => {
+            this.getData()
             Vue.toasted.show("Date medical card: " + moment(date).format('MM/DD/YYYY'), {
               theme: "toasted-primary",
               position: "top-right",
@@ -2394,20 +2469,20 @@ export default {
           });
       },
       dateClearMedicalCard(id) {
-        const update = { endOfDateMedicalCard: this.dates }
+        const update = { endOfDateMedicalCard: this.empty }
         axios
           .put(url + 'user/' + id, update, { headers: authHeader()})
           .then(() => {
+            this.getData()
             Vue.toasted.show("Date medical card clear &#10060;", {
               theme: "toasted-primary",
               position: "top-right",
               duration: 3000,
             });
-            this.getendOfDateMedicalCard()
           });
       },
       dateClearMedical(id) {
-        const update = { endOfDateMedicalCard: this.dates }
+        const update = { endOfDateMedicalCard: this.empty }
         axios
           .put(url + 'user/' + id, update, { headers: authHeader()})
           .then(() => {
@@ -2417,6 +2492,9 @@ export default {
 
 
       // security card
+      loadSecurity() {
+        this.getSecurity()
+      },
       getSecurity() {
         axios
           .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
@@ -2433,13 +2511,14 @@ export default {
           formData.append('security', this.security)
           axios.post(url + 'user/security/' + this.$route.params.id + '/security', formData, { headers: authHeader()})
           .then(() => {
+            this.getSecurity()
+            this.getData()
             this.clear()
             Vue.toasted.show("Social security card uploads &#9989;", {
               theme: "toasted-primary",
               position: "top-right",
               duration: 3000,
             });
-            this.getSecurity()
           })
         } else {console.log("empty")}
       },
@@ -2448,12 +2527,13 @@ export default {
         axios
           .delete(url + 'user/security/' + id, { headers: authHeader()})
           .then(() => {
+            this.getData()
+            this.getSecurity()
             Vue.toasted.show("Social security card delete &#10060;", {
               theme: "toasted-primary",
               position: "top-right",
               duration: 3000,
             });
-            this.getSecurity()
           });
       },
       deleteSecurityAll() {
@@ -2472,6 +2552,9 @@ export default {
 
 
       // employment card
+      loadEmployment() {
+        this.getEmployments()
+      },
       getEmployments() {
         axios
           .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
@@ -2489,12 +2572,13 @@ export default {
           axios.post(url + 'user/employment/' + this.$route.params.id + '/employment', formData, { headers: authHeader()})
           .then(() => {
             this.clear()
+            this.getEmployments()
+            this.getData()
             Vue.toasted.show("Driver's Application for Employment uploads &#9989;", {
               theme: "toasted-primary",
               position: "top-right",
               duration: 3000,
             });
-            this.getEmployments()
           })
         } else {console.log("empty")}  
       },
@@ -2509,6 +2593,7 @@ export default {
               duration: 3000,
             });
             this.getEmployments()
+            this.getData()
           });
       },
       deleteEmploymentAll() {
@@ -2529,6 +2614,9 @@ export default {
 
 
       // w4form
+      loadW4form() {
+        this.getW4forms()
+      },
       getW4forms() {
         axios
           .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
@@ -2552,6 +2640,7 @@ export default {
               duration: 3000,
             });
             this.getW4forms()
+            this.getData()
           })
         } else {console.log("empty")}
       },
@@ -2566,6 +2655,7 @@ export default {
               duration: 3000,
             });
             this.getW4forms()
+            this.getData()
           });
       },
       deleteW4formAll() {
@@ -2586,6 +2676,9 @@ export default {
 
 
       // Confidentials
+      loadConfidential() {
+        this.getConfidentials()
+      },
       getConfidentials() {
         axios
           .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
@@ -2609,6 +2702,7 @@ export default {
               duration: 3000,
             });
             this.getConfidentials()
+            this.getData()
           })
         } else {console.log("empty")}  
       },
@@ -2623,6 +2717,7 @@ export default {
               duration: 3000,
             });
             this.getConfidentials()
+            this.getData()
           });
       },
       deleteConfidentialAll() {
@@ -2644,6 +2739,9 @@ export default {
 
 
       // Owned
+      loadOwned() {
+        this.getOwneds()
+      },
       getOwneds() {
         axios
           .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
@@ -2667,6 +2765,7 @@ export default {
               duration: 3000,
             });
             this.getOwneds()
+            this.getData()
           })
         } else {console.log("empty")}
       },
@@ -2681,6 +2780,7 @@ export default {
               duration: 3000,
             });
             this.getOwneds()
+            this.getData()
           });
       },
       deleteOwnedAll() {
@@ -2700,6 +2800,9 @@ export default {
 
 
       // Expenses 
+      loadExpenses() {
+        this.getExpensess()
+      },
       getExpensess() {
         axios
           .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
@@ -2723,6 +2826,7 @@ export default {
               duration: 3000,
             });
             this.getExpensess()
+            this.getData()
           })
         } else {console.log("empty")}  
       },
@@ -2737,6 +2841,7 @@ export default {
               duration: 3000,
             });
             this.getExpensess()
+            this.getData()
           });
       },
       deleteExpensesAll() {
@@ -2757,6 +2862,9 @@ export default {
 
 
       // Desposit
+      loadDesposit() {
+        this.getDesposits()
+      },
       getDesposits() {
         axios
           .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
@@ -2780,6 +2888,7 @@ export default {
               duration: 3000,
             });
             this.getDesposits()
+            this.getData()
           })
         } else {console.log("empty")}
       },
@@ -2794,6 +2903,7 @@ export default {
               duration: 3000,
             });
             this.getDesposits()
+            this.getData()
           });
       },
       deleteDespositAll() {
@@ -2813,6 +2923,9 @@ export default {
 
 
       // credit
+      loadCredit() {
+        this.getCredits()
+      },
       getCredits() {
         axios
           .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
@@ -2836,6 +2949,7 @@ export default {
               duration: 3000,
             });
             this.getCredits()
+            this.getData()
           })
         } else {console.log("empty")}  
       },
@@ -2850,6 +2964,7 @@ export default {
               duration: 3000,
             });
             this.getCredits()
+            this.getData()
           });
       },
       deleteCreditAll() {
@@ -2869,6 +2984,9 @@ export default {
 
 
       // eligiibity Eligiibity
+      loadEligiibity() {
+        this.getEligiibitys()
+      },
       getEligiibitys() {
         axios
           .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
@@ -2892,6 +3010,7 @@ export default {
               duration: 3000,
             });
             this.getEligiibitys()
+            this.getData()
           })
         } else {console.log("empty")}  
       },
@@ -2906,6 +3025,7 @@ export default {
               duration: 3000,
             });
             this.getEligiibitys()
+            this.getData()
           });
       },
       deleteEligiibityAll() {
@@ -2925,6 +3045,9 @@ export default {
 
 
       // drug Drug
+      loadDrug() {
+        this.getDrugs()
+      },
       getDrugs() {
         axios
           .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
@@ -2948,6 +3071,7 @@ export default {
               duration: 3000,
             });
             this.getDrugs()
+            this.getData()
           })
         } else {console.log("empty")}  
       },
@@ -2962,6 +3086,7 @@ export default {
               duration: 3000,
             });
             this.getDrugs()
+            this.getData()
           });
       },
       deleteDrugAll() {
@@ -2979,6 +3104,9 @@ export default {
 
 
       // mvr
+      loadMvr() {
+        this.getMvrs()
+      },
       getMvrs() {
         axios
           .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
@@ -3002,6 +3130,7 @@ export default {
               duration: 3000,
             });
             this.getMvrs()
+            this.getData()
           })
         } else {console.log("empty")}  
       },
@@ -3016,6 +3145,7 @@ export default {
               duration: 3000,
             });
             this.getMvrs()
+            this.getData()
           });
       },
       deleteMvrAll() {
@@ -3034,7 +3164,10 @@ export default {
 
 
 
-      // another Another
+      // another
+      loadAnother() {
+        this.getAnothers()
+      },
       getAnothers() {
         axios
           .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
@@ -3058,6 +3191,7 @@ export default {
               duration: 3000,
             });
             this.getAnothers()
+            this.getData()
           })
         } else {console.log("empty")}
       },
@@ -3072,6 +3206,7 @@ export default {
               duration: 3000,
             });
             this.getAnothers()
+            this.getData()
           });
       },
       deleteAnotherAll() {
@@ -3088,17 +3223,90 @@ export default {
       },
 
 
+      //PDF
+      loadPDF() {
+        this.getFile()
+      },
+      getFile() {
+        axios
+          .get(url + 'admin/' + this.$route.params.id, { headers: authHeader()})
+          .then(response => (this.files = response.data.files));
+        this.loading = false
+      },
+      onChangeFile (event) {
+        this.file = event.target.files[0]
+      },
+      onUploadFile() {
+          this.loading = true
+          const formData = new FormData()
+          formData.append('file', this.file, this.nameFile)
+          axios.post(url + 'user/filePdf/' + this.$route.params.id, formData, { headers: authHeader()})
+          .then(() => {
+            this.clear()
+            Vue.toasted.show("PDF file upload &#9989;", {
+              theme: "toasted-primary",
+              position: "top-right",
+              duration: 3000,
+            });
+            this.getFile()
+            this.getData()
+          })
+      },
 
+      deletePDF(id, name) {
+        this.isActive = true;
+        axios
+          .delete(url + 'user/filePdf/' + id, { headers: authHeader()})
+          .then(() => {
+            axios
+              .delete(url + 'all/' + name, { headers: authHeader()})
+                Vue.toasted.show("PDF file deleted &#9989;", {
+                  theme: "toasted-primary",
+                  position: "top-right",
+                  duration: 3000,
+                });
+                this.getFile()
+                this.getData()
+                this.isActive = false;
+          });
 
+      },
 
   }
 };
 </script>
 
 <style>
+.icoDoc {
+  width: 33px;
+}
+.icoDocPDF{
+  width: 90px;
+}
+.icoInfo{
+  width: 20px;
+}
+.act {
+  background-color: red;
+}
 .user{
   padding-top: 5%;
   position: relative;
+}
+.dampFileUser {
+  width: 160px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-weight: 700;
+  color: rgba(56, 60, 87, 0.7);
+  padding: 5px 5px 5px 5px;
+  border-radius: 5px;
+  background-color: #fff;
+  cursor: pointer;
+}
+.dampFileUser:hover{
+  background-color: #48BF91;
+  color: #fff
 }
 .overlays {
   padding-top: 20%;
@@ -3109,6 +3317,7 @@ export default {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, .5);
+  border-radius: 10px;
 }
 .loading {
   position: absolute;
@@ -3141,21 +3350,30 @@ export default {
   max-height: 130px;
 }
 .userNameInfo {
-  padding-top: 30px;
+  padding-top: 10px;
   color: rgba(56, 60, 87, 0.7);
+  border-left: 3px solid rgba(226, 228, 228, 0.8);
+  border-top: 3px solid rgba(226, 228, 228, 0.8);
+  border-bottom: 3px solid rgba(226, 228, 228, 0.8);
+  border-radius: 10px 0px 0px 10px;
 }
 .userNameInfoText {
   padding: 0px 5px 5px 0px;
 }
 .status{
-  padding-top: 30px;
+  padding-top: 10px;
+  border-right: 3px solid rgba(226, 228, 228, 0.8);
+  border-top: 3px solid rgba(226, 228, 228, 0.8);
+  border-bottom: 3px solid rgba(226, 228, 228, 0.8);
+  border-radius: 0px 10px 10px 0px;
+  width: 32%;
+  padding-left: 16%;
 }
 .statusForm {
 
 }
-.statusText {
-  font-size: 25px;
-  color: rgba(176, 176, 176, 1);
+.statusForm > form > select{
+  width: 100%;
 }
 .place {
 
@@ -3164,13 +3382,22 @@ export default {
 
 }
 .placeDocSetting {
-  padding-top: 25px;
+  margin-top: 25px;
+  margin-left: 0px;
+  margin-right: 0px;
+  padding-top: 10px;
+  background-color: rgba(226, 228, 228, 0.5);
+  border-radius: 10px;
 }
 .placeMenu{
 
 }
 .btnShowHide {
-  width: 60px;
+  background-color: rgb(93, 150, 127);
+  border-radius: 5px;
+  padding-left: 5px;
+  width: 65px;
+  color: #fff;
   cursor: pointer;
 }
 .placeInfo{
@@ -3270,12 +3497,44 @@ export default {
 }
 .infoTitle{
   margin-bottom: 15px;
+  padding: 1px;
+  padding-left: 10px;
+  color: #fff;
+  border-radius: 10px;
+  background: linear-gradient(-45deg, #AC96B2, #383c57, #AC96B2 );
+  background-size: 400% 400%;
+  animation: gradientBG 25s ease infinite;
 }
 .documentsTitle {
-  padding-bottom: 25px;
+  margin-bottom: 15px;
+  padding: 1px;
+  padding-left: 10px;
+  color: #fff;
+  border-radius: 10px;
+  background: linear-gradient(-45deg, #383c57, #23d5ab, #383c57 );
+  background-size: 400% 400%;
+  animation: gradientBG 25s ease infinite;
 }
 .documentsSetting {
-
+  padding: 1px;
+  padding-left: 10px;
+  padding-bottom: 10px;
+  border-radius: 10px;
+  color: #fff;
+  background: linear-gradient(-45deg, #ED6868, #383c57, #ED6868 );
+  background-size: 400% 400%;
+  animation: gradientBG 25s ease infinite;
+}
+@keyframes gradientBG {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 .infoComment {
   padding: 5px;
@@ -3286,6 +3545,7 @@ export default {
   overflow: auto;
 }
 .infoBlockLeft {
+  padding-left: 13px;
   font-size: 17px;
   font-weight: 400;
 }
@@ -3298,13 +3558,30 @@ export default {
 }
 .infoItem {
   padding-bottom: 5px;
+
 }
 .infoItem > span {
   font-weight: 600;
 }
 .itemSetting {
-  padding-bottom: 10px;
-  border-bottom: 2px solid rgb(179 179 179 / 80%);
+  margin-bottom: 3px;
+}
+.itemSettingInfo{
+  display: inline-block;
+  width: 49%;
+  margin-left: 12px;
+  border-radius: 3px;
+  margin-top: 1px;
+  padding: 4px;
+  height: 29px;
+  background-color: #fff;
+}
+.inputSetting{
+  border: none;
+  border-radius: 3px;
+  padding-left: 0px;
+  height: 30px;
+  padding-left: 5px;
 }
 .settingTitle {
   font-size: 16px;
@@ -3344,6 +3621,26 @@ export default {
   white-space: nowrap;
   margin-left: 5px;
 }
+.btnSubmit{
+  border-radius: 4px;
+  color: #fff;
+  font-size: 1em;
+  font-weight: bold;
+  overflow: hidden;
+  padding: 3px;
+  position: relative;
+  text-align: center;
+  width: 120px;
+  cursor: pointer;
+}
+@keyframes glowing {
+  0% { background-color: #2ba805; box-shadow: 0 0 5px #2ba805; }
+  50% { background-color: #49e819; box-shadow: 0 0 20px #49e819; }
+  100% { background-color: #2ba805; box-shadow: 0 0 5px #2ba805; }
+}
+.btnSubmit {
+  animation: glowing 1300ms infinite;
+}
 .btnClearSetiing{
   margin-left: 9px;
   padding-left: 15px;
@@ -3355,17 +3652,19 @@ export default {
   padding-right: 15px;
 }
 .btnСonfirmSettingDate{
-  margin-left: 125px;
+  margin-left: 5px;
   padding-left: 15px;
   padding-right: 15px;
 }
 .btnStatus {
   border: none;
   padding: 0px 0px 0px 0px;
+  width: 100%;
+  margin-top: 5px;
 }
 .btnStatusText {  
   color: #fff; 
-  padding: 0px 7px 0px 5px;
+  padding: 2px 3px 0px 3px;
   border-radius: 3px;
 }
 .btnSetDate:hover, .btnSubmit:hover, .btnСonfirmSetting:hover, .btnСonfirmSettingDate:hover, .btnAddAvatar:hover {
@@ -3388,7 +3687,7 @@ export default {
   box-shadow: rgba(39, 174, 96, .2) 0 6px 12px;
 }
 
-.btnDelete, .btnDellAvatar, .btnDeleteUser {
+.btnDelete, .btnDellAvatar, .btnDeleteUser, .btnOpenFile {
   appearance: none;
   backface-visibility: hidden;
   background-color: rgb(237, 104, 104);
@@ -3418,9 +3717,22 @@ export default {
   white-space: nowrap;
   width: 100%;
 }
+.btnDellAvatar{
+  width: 130px;
+}
 .btnDelete {
   margin-top: 10px;
   margin-bottom: 15px;
+}
+.btnOpenFile {
+  background-color: #5D967F;
+}
+.btnOpenFile:active {
+  transform: translateY(2px);
+  transition-duration: .35s;
+}
+.btnOpenFile:hover {
+  background-color: #1e8449;
 }
 .btnDeleteUser{
   width: 130px;
@@ -3442,15 +3754,46 @@ export default {
 }
 
 .statusForm select {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 400;
   outline: 0;
   padding: 0 0em 0 0em;
   color: rgba(176, 176, 176, 1);
   cursor: pointer;
 }
-.btnStatusText {
-  padding: 3px 8px 1px 5px;
+
+.fileUpload {
+  background: #635E5E;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 1em;
+  font-weight: bold;
+  overflow: hidden;
+  padding: 3px;
+  position: relative;
+  text-align: center;
+  width: 120px;
+   cursor: pointer;
+}
+.fileUpload:hover, .fileUpload:active, .fileUpload:focus {
+  background: #847F7F;
+  cursor: pointer;
+}
+.fileUpload input.upload {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0;
+    filter: alpha(opacity=0);
+    width: 148px;
+    height: 46px;
+  cursor: pointer;
 }
 
 
@@ -3514,6 +3857,7 @@ textarea {
   background-color: #fff;
   overflow: auto;
   overflow-x: hidden;
+  color: #000;
 }
 
 .modalWrapperDeleteUser .closeMadal {
@@ -3549,24 +3893,20 @@ textarea {
 
 @media screen and (max-width: 1400px) {
   .avatar {
-    min-width: 170px;
+    min-width: 160px;
     min-height: 110px;
-    max-width: 170px;
+    max-width: 160px;
     max-height: 110px;
   }
   .avatarEmpty {
-    min-width: 170px;
+    min-width: 160px;
     min-height: 110px;
-    max-width: 170px;
+    max-width: 160px;
     max-height: 110px;
   }
   .userNameInfoText {
     padding: px 0px 0px 0px;
     font-size: 20px;
-  }
-  .statusText {
-    font-size: 20px;
-    padding-left: 0%;
   }
   .statusForm select {
     font-size: 15px;
@@ -3604,6 +3944,27 @@ textarea {
     left: 30%;
     width: 45%;
   }
+  .itemSettingInfo{
+    width: 87%;
+  }
+  .status{
+    padding-left: 16%;
+  }
+}
+@media screen and (max-width: 1200px) {
+  .itemSettingInfo {
+    width: 84%;
+  }
+  .imageDocument {
+    min-height: 90px;
+    max-height: 90px;
+  }
+  .nameDocument > h4 {
+    font-size: 18px;
+  }
+  .status{
+    padding-left: 13%;
+  }
 }
 @media screen and (max-width: 991px) {
   .titleMenu {
@@ -3632,23 +3993,19 @@ textarea {
     height: 90px;
   }
   .avatar {
-    min-width: 128px;
+    min-width: 120px;
     min-height: 95px;
-    max-width: 128px;
+    max-width: 120px;
     max-height: 95px;
   }
   .avatarEmpty {
-    min-width: 128px;
+    min-width: 120px;
     min-height: 95px;
-    max-width: 128px;
+    max-width: 120px;
     max-height: 95px;
   }
   .userNameInfoText {
     padding: 0px 0px 0px 0px;
-    font-size: 16px;
-  }
-  .statusText {
-    padding-top: 10px;
     font-size: 16px;
   }
   .btnStatusText {
@@ -3673,6 +4030,21 @@ textarea {
     left: 23%;
     width: 60%;
     height: 20%;
+  }
+  .itemSettingInfo {
+    width: 79%;
+  }
+  .status{
+    padding-left: 6%;
+  }
+  .infoTitle{
+    background: rgb(56, 60, 87);
+  }
+  .documentsTitle {
+    background: rgb(56, 60, 87);
+  }
+  .documentsSetting {
+    background: rgb(56, 60, 87);
   }
 }
 @media screen and (max-width: 767px) {
@@ -3715,12 +4087,12 @@ textarea {
   }
   .status {
     padding-top: 0px;
-    padding-left: 30%;
     width: 60%;
+    border: none;
   }
-  .userNameInfo {
-    padding-top: 25px;    
+  .userNameInfo {  
     width: 40%;
+    border: none;
   }
   .userNameInfoText {
     font-size: 25px;
@@ -3768,9 +4140,7 @@ textarea {
   .status {
     padding-top: 0px;
     width: 40%;
-  }
-  .statusText {
-    padding-top: 5px;
+    border: none;
   }
   .btnStatus {
     margin-top: 5px;
@@ -3800,8 +4170,8 @@ textarea {
     height: 120px;
   }
   .imageDocument {
-    min-height: 220px;
-    max-height: 220px;
+    min-height: 160px;
+    max-height: 160px;
   }
   .placeDoc {
     border: 2px solid rgb(80 134 149 / 50%);
@@ -3809,7 +4179,9 @@ textarea {
     margin-bottom: 10px;
   }
   .userNameInfo{
-    width: 40%;
+    width: 56%;
+    height: 100px;
+    border: none;
   }
   .avatarBlock {
     width: 20%;
